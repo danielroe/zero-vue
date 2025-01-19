@@ -10,10 +10,10 @@ export type QueryResultDetails = Readonly<{
   type: ResultType
 }>
 
-export type QueryResult<TReturn extends QueryType> = readonly [
-  ComputedRef<Smash<TReturn>>,
-  ComputedRef<QueryResultDetails>,
-]
+export interface QueryResult<TReturn extends QueryType> {
+  data: ComputedRef<Smash<TReturn>>
+  resultDetails: ComputedRef<QueryResultDetails>
+}
 
 export function useQuery<
   TSchema extends TableSchema,
@@ -33,8 +33,8 @@ export function useQuery<
     onUnmounted(() => view.value.destroy())
   }
 
-  return [
-    computed(() => view.value.data),
-    computed(() => ({ type: view.value.resultType })),
-  ] as const
+  return {
+    data: computed(() => view.value.data),
+    resultDetails: computed(() => ({ type: view.value.resultType })),
+  }
 }
