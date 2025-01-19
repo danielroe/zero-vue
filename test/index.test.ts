@@ -28,7 +28,7 @@ describe('zero-vue', () => {
       kvStore: 'mem',
     })
 
-    const users = useQuery(z.query.user)
+    const { data: users } = useQuery(z.query.user)
 
     expect(users.value).toEqual([])
 
