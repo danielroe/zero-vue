@@ -4,12 +4,21 @@ import type { AdvancedQuery, Query, QueryType, Smash, TableSchema } from '@rocic
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import { computed, getCurrentInstance, isRef, onUnmounted, shallowRef, toValue, watch } from 'vue'
 
-import { vueViewFactory } from './view'
+import { type ResultType, vueViewFactory } from './view'
+
+export type QueryResultDetails = Readonly<{
+  type: ResultType
+}>
+
+export type QueryResult<TReturn extends QueryType> = readonly [
+  ComputedRef<Smash<TReturn>>,
+  ComputedRef<QueryResultDetails>,
+]
 
 export function useQuery<
   TSchema extends TableSchema,
   TReturn extends QueryType,
->(_query: MaybeRefOrGetter<Query<TSchema, TReturn>>): ComputedRef<Smash<TReturn>> {
+>(_query: MaybeRefOrGetter<Query<TSchema, TReturn>>): QueryResult<TReturn> {
   const query = toValue(_query) as AdvancedQuery<TSchema, TReturn>
   const view = shallowRef(query.materialize(vueViewFactory))
 
@@ -24,5 +33,8 @@ export function useQuery<
     onUnmounted(() => view.value.destroy())
   }
 
-  return computed(() => view.value.data)
+  return [
+    computed(() => view.value.data),
+    computed(() => ({ type: view.value.resultType })),
+  ] as const
 }
