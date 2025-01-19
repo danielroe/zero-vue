@@ -6,11 +6,11 @@ import { computed, getCurrentInstance, isRef, onUnmounted, shallowRef, toValue, 
 
 import { type ResultType, vueViewFactory } from './view'
 
-export type QueryResultDetails = Readonly<{
+type QueryResultDetails = Readonly<{
   type: ResultType
 }>
 
-export interface QueryResult<TReturn extends QueryType> {
+interface QueryResult<TReturn extends QueryType> {
   data: ComputedRef<Smash<TReturn>>
   resultDetails: ComputedRef<QueryResultDetails>
 }
