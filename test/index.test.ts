@@ -1,22 +1,19 @@
-import { createSchema, createTableSchema, Zero } from '@rocicorp/zero'
+import { createSchema, string, table, Zero } from '@rocicorp/zero'
 import { describe, expect, it } from 'vitest'
 
 import { useQuery } from '../src/index'
 
 describe('zero-vue', () => {
   it('works', async () => {
-    const schema = createSchema({
-      version: 1,
-      tables: {
-        user: createTableSchema({
-          tableName: 'user',
-          columns: {
-            id: 'string',
-            name: 'string',
-          },
-          primaryKey: 'id',
-        }),
-      },
+    const user = table('user')
+      .columns({
+        id: string(),
+        name: string(),
+      })
+      .primaryKey('id')
+
+    const schema = createSchema(1, {
+      tables: [user],
     })
 
     const z = new Zero({
@@ -28,7 +25,7 @@ describe('zero-vue', () => {
       kvStore: 'mem',
     })
 
-    const users = useQuery(z.query.user)
+    const { data: users } = useQuery(z.query.user)
 
     expect(users.value).toEqual([])
 
