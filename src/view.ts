@@ -1,71 +1,115 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { Change, Entry, Format, Input, Output, Query, QueryType, Smash, TableSchema, View } from '@rocicorp/zero/advanced'
+import type { Change, Entry, Format, HumanReadable, Input, Output, Query, ViewFactory } from '@rocicorp/zero/advanced'
+// Schema is used internally in the rocicorp monorepo, only the react namespace exports it
+import type { Schema } from '@rocicorp/zero/react'
 import { applyChange } from '@rocicorp/zero/advanced'
 import { reactive } from 'vue'
 
-export class VueView<V extends View> implements Output {
+type ResultType = 'complete' | 'unknown'
+
+export interface QueryResultDetails {
+  readonly type: ResultType
+}
+
+type State = [Entry, QueryResultDetails]
+
+const complete = { type: 'complete' } as const
+const unknown = { type: 'unknown' } as const
+
+class VueView<V> implements Output {
   readonly #input: Input
   readonly #format: Format
   readonly #onDestroy: () => void
 
-  // Synthetic "root" entry that has a single "" relationship, so that we can
-  // treat all changes, including the root change, generically.
-  readonly #root: Entry
+  #state: State
+
+  #pendingChanges: Change[] = []
 
   constructor(
     input: Input,
+    onTransactionCommit: (cb: () => void) => void,
     format: Format = { singular: false, relationships: {} },
     onDestroy: () => void = () => {},
+    queryComplete: true | Promise<true>,
   ) {
     this.#input = input
+    onTransactionCommit(this.#onTransactionCommit)
     this.#format = format
     this.#onDestroy = onDestroy
-    this.#root = reactive({
-      '': format.singular ? undefined : [],
-    })
+    this.#state = reactive([
+      { '': format.singular ? undefined : [] },
+      queryComplete === true ? complete : unknown,
+    ])
     input.setOutput(this)
 
-    for (const node of input.fetch({})) {
-      applyChange(
-        this.#root,
-        { type: 'add', node },
-        input.getSchema(),
-        '',
-        this.#format,
-      )
+    this.#applyChanges(input.fetch({}), node => ({ type: 'add', node }))
+
+    if (queryComplete !== true) {
+      void queryComplete.then(() => {
+        this.#state = [this.#state[0], complete]
+      })
     }
   }
 
   get data() {
-    return this.#root[''] as V
+    return this.#state[0][''] as V
+  }
+
+  get resultDetails() {
+    return this.#state[1]
   }
 
   destroy() {
     this.#onDestroy()
   }
 
+  #onTransactionCommit = () => {
+    this.#applyChanges(this.#pendingChanges, c => c)
+  }
+
+  #applyChanges<T>(changes: Iterable<T>, mapper: (v: T) => Change): void {
+    try {
+      for (const change of changes) {
+        applyChange(
+          this.#state[0],
+          mapper(change),
+          this.#input.getSchema(),
+          '',
+          this.#format,
+        )
+      }
+    }
+    finally {
+      this.#pendingChanges = []
+    }
+  }
+
   push(change: Change): void {
-    applyChange(
-      this.#root,
-      change,
-      this.#input.getSchema(),
-      '',
-      this.#format,
-    )
+    // Delay setting the state until the transaction commit.
+    this.#pendingChanges.push(change)
   }
 }
 
 export function vueViewFactory<
-  TSchema extends TableSchema,
-  TReturn extends QueryType,
+  TSchema extends Schema,
+  TTable extends keyof TSchema['tables'] & string,
+  TReturn,
 >(
-  _query: Query<TSchema, TReturn>,
+  _query: Query<TSchema, TTable, TReturn>,
   input: Input,
   format: Format,
   onDestroy: () => void,
-): VueView<Smash<TReturn>> {
-  const v = new VueView<Smash<TReturn>>(input, format, onDestroy)
-
-  return v
+  onTransactionCommit: (cb: () => void) => void,
+  queryComplete: true | Promise<true>,
+) {
+  return new VueView<HumanReadable<TReturn>>(
+    input,
+    onTransactionCommit,
+    format,
+    onDestroy,
+    queryComplete,
+  )
 }
+
+vueViewFactory satisfies ViewFactory<Schema, string, unknown, unknown>
