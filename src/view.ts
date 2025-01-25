@@ -1,8 +1,7 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
+import type { Schema } from '@rocicorp/zero'
 import type { Change, Entry, Format, HumanReadable, Input, Output, Query, ViewFactory } from '@rocicorp/zero/advanced'
-// Schema is used internally in the rocicorp monorepo, only the react namespace exports it
-import type { Schema } from '@rocicorp/zero/react'
 import { applyChange } from '@rocicorp/zero/advanced'
 import { reactive } from 'vue'
 

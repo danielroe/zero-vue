@@ -1,8 +1,7 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
+import type { Schema } from '@rocicorp/zero'
 import type { AdvancedQuery, HumanReadable, Query } from '@rocicorp/zero/advanced'
-// Schema is used internally in the rocicorp monorepo, only the react namespace exports it
-import type { Schema } from '@rocicorp/zero/react'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 
 import { computed, getCurrentInstance, isRef, onUnmounted, shallowRef, toValue, watch } from 'vue'
