@@ -46,7 +46,7 @@ class VueView<V> implements Output {
 
     if (queryComplete !== true) {
       void queryComplete.then(() => {
-        this.#state = [this.#state[0], complete]
+        this.#state[1] = complete
       })
     }
   }
