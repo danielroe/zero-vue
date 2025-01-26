@@ -1,11 +1,9 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { Schema } from '@rocicorp/zero'
+import type { ResultType, Schema } from '@rocicorp/zero'
 import type { Change, Entry, Format, HumanReadable, Input, Output, Query, ViewFactory } from '@rocicorp/zero/advanced'
 import { applyChange } from '@rocicorp/zero/advanced'
 import { reactive } from 'vue'
-
-type ResultType = 'complete' | 'unknown'
 
 export interface QueryResultDetails {
   readonly type: ResultType
