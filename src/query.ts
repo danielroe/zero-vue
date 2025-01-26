@@ -1,15 +1,15 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { Schema } from '@rocicorp/zero'
+import type { ResultType, Schema } from '@rocicorp/zero'
 import type { AdvancedQuery, HumanReadable, Query } from '@rocicorp/zero/advanced'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 
 import { computed, getCurrentInstance, isRef, onUnmounted, shallowRef, toValue, watch } from 'vue'
-import { type QueryResultDetails, vueViewFactory } from './view'
+import { vueViewFactory } from './view'
 
 interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
-  status: ComputedRef<QueryResultDetails['type']>
+  status: ComputedRef<ResultType>
 }
 
 export function useQuery<

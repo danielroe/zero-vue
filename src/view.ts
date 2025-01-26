@@ -5,7 +5,7 @@ import type { Change, Entry, Format, HumanReadable, Input, Output, Query, ViewFa
 import { applyChange } from '@rocicorp/zero/advanced'
 import { reactive } from 'vue'
 
-export interface QueryResultDetails {
+interface QueryResultDetails {
   readonly type: ResultType
 }
 
