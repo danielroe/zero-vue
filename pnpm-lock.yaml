@@ -12,7 +12,7 @@ importers:
   .:
     dependencies:
       '@rocicorp/zero':
-        specifier: ^0.12.0
+        specifier: ^0.12.2025012600
         version: 0.12.2025013100
     devDependencies:
       '@antfu/eslint-config':
