@@ -33,6 +33,6 @@ export function useQuery<
 
   return {
     data: computed(() => view.value.data),
-    status: computed(() => view.value.resultDetails.type),
+    status: computed(() => view.value.status),
   }
 }

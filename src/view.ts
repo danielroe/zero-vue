@@ -53,8 +53,8 @@ class VueView<V> implements Output {
     return this.#state[0][''] as V
   }
 
-  get resultDetails() {
-    return this.#state[1]
+  get status() {
+    return this.#state[1].type
   }
 
   destroy() {
