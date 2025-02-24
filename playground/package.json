@@ -14,7 +14,7 @@
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
-    "jose": "^5.9.6",
+    "jose": "^6.0.0",
     "js-cookie": "^3.0.5",
     "vue": "^3.5.13",
     "zero-vue": "latest"
