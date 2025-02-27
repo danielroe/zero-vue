@@ -21,8 +21,6 @@ class VueView<V> implements Output {
 
   #state: State
 
-  #pendingChanges: Change[] = []
-
   constructor(
     input: Input,
     onTransactionCommit: (cb: () => void) => void,
@@ -31,7 +29,6 @@ class VueView<V> implements Output {
     queryComplete: true | Promise<true>,
   ) {
     this.#input = input
-    onTransactionCommit(this.#onTransactionCommit)
     this.#format = format
     this.#onDestroy = onDestroy
     this.#state = reactive([
@@ -40,7 +37,9 @@ class VueView<V> implements Output {
     ])
     input.setOutput(this)
 
-    this.#applyChanges(input.fetch({}), node => ({ type: 'add', node }))
+    for (const node of input.fetch({})) {
+      this.#applyChange({ type: 'add', node })
+    }
 
     if (queryComplete !== true) {
       void queryComplete.then(() => {
@@ -61,30 +60,18 @@ class VueView<V> implements Output {
     this.#onDestroy()
   }
 
-  #onTransactionCommit = () => {
-    this.#applyChanges(this.#pendingChanges, c => c)
-  }
-
-  #applyChanges<T>(changes: Iterable<T>, mapper: (v: T) => Change): void {
-    try {
-      for (const change of changes) {
-        applyChange(
-          this.#state[0],
-          mapper(change),
-          this.#input.getSchema(),
-          '',
-          this.#format,
-        )
-      }
-    }
-    finally {
-      this.#pendingChanges = []
-    }
+  #applyChange(change: Change): void {
+    applyChange(
+      this.#state[0],
+      change,
+      this.#input.getSchema(),
+      '',
+      this.#format,
+    )
   }
 
   push(change: Change): void {
-    // Delay setting the state until the transaction commit.
-    this.#pendingChanges.push(change)
+    this.#applyChange(change)
   }
 }
 
