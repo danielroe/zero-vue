@@ -20,7 +20,7 @@ export function useQuery<
   const query = toValue(_query) as AdvancedQuery<TSchema, TTable, TReturn>
   const view = shallowRef(query.materialize(vueViewFactory))
 
-  if (isRef(_query) || _query instanceof Function) {
+  if (isRef(_query) || typeof _query === 'function') {
     watch(_query, (query) => {
       view.value.destroy()
       view.value = (query as AdvancedQuery<TSchema, TTable, TReturn>).materialize(vueViewFactory)
