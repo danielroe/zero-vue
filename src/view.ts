@@ -18,6 +18,7 @@ class VueView<V> implements Output {
   readonly #input: Input
   readonly #format: Format
   readonly #onDestroy: () => void
+  readonly #refCountMap = new WeakMap<Entry, number>()
 
   #state: State
 
@@ -67,6 +68,7 @@ class VueView<V> implements Output {
       this.#input.getSchema(),
       '',
       this.#format,
+      this.#refCountMap,
     )
   }
 
