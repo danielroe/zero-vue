@@ -12,7 +12,7 @@ describe('zero-vue', () => {
       })
       .primaryKey('id')
 
-    const schema = createSchema(1, {
+    const schema = createSchema({
       tables: [user],
     })
 
@@ -34,6 +34,14 @@ describe('zero-vue', () => {
     expect(users.value).toEqual([])
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(users.value).toEqual([{ id: 'asdf', name: 'Alice' }])
+    expect(users.value).toMatchInlineSnapshot(`
+        [
+          {
+            "id": "asdf",
+            "name": "Alice",
+            Symbol(rc): 1,
+          },
+        ]
+    `)
   })
 })

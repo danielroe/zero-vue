@@ -1,9 +1,19 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { ResultType, Schema } from '@rocicorp/zero'
-import type { Change, Entry, Format, HumanReadable, Input, Output, Query, ViewFactory } from '@rocicorp/zero/advanced'
-import { applyChange } from '@rocicorp/zero/advanced'
-import { reactive, toRaw } from 'vue'
+import type {
+  Change,
+  Entry,
+  Format,
+  HumanReadable,
+  Input,
+  Output,
+  Query,
+  ResultType,
+  Schema,
+  ViewFactory,
+} from '@rocicorp/zero'
+import { applyChange } from '@rocicorp/zero'
+import { reactive } from 'vue'
 
 interface QueryResultDetails {
   readonly type: ResultType
@@ -14,33 +24,10 @@ type State = [Entry, QueryResultDetails]
 const complete = { type: 'complete' } as const
 const unknown = { type: 'unknown' } as const
 
-interface RefCountMap {
-  get: (entry: Entry) => number | undefined
-  set: (entry: Entry, refCount: number) => void
-  delete: (entry: Entry) => boolean
-}
-
-class VueRefCountMap implements RefCountMap {
-  readonly #map = new WeakMap<Entry, number>()
-
-  get(entry: Entry) {
-    return this.#map.get(toRaw(entry))
-  }
-
-  set(entry: Entry, refCount: number) {
-    this.#map.set(toRaw(entry), refCount)
-  }
-
-  delete(entry: Entry) {
-    return this.#map.delete(toRaw(entry))
-  }
-}
-
-class VueView<V> implements Output {
+export class VueView<V> implements Output {
   readonly #input: Input
   readonly #format: Format
   readonly #onDestroy: () => void
-  readonly #refCountMap = new VueRefCountMap()
 
   #state: State
 
@@ -90,7 +77,6 @@ class VueView<V> implements Output {
       this.#input.getSchema(),
       '',
       this.#format,
-      this.#refCountMap,
     )
   }
 

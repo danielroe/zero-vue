@@ -55,7 +55,7 @@ const messageRelationships = relationships(message, ({ one }) => ({
   }),
 }))
 
-export const schema = createSchema(1, {
+export const schema = createSchema({
   tables: [user, medium, message],
   relationships: [messageRelationships],
 })
