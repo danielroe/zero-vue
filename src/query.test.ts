@@ -3,7 +3,7 @@ import { createSchema, number, string, table, Zero } from '@rocicorp/zero'
 import { describe, expect, it, vi } from 'vitest'
 import { ref, watchEffect } from 'vue'
 import { useQuery } from './query'
-import { vueViewFactory } from './view'
+import { VueView, vueViewFactory } from './view'
 
 async function setupTestEnvironment() {
   const schema = createSchema({
@@ -80,8 +80,12 @@ describe('useQuery', () => {
     z.close()
   })
 
-  it('useQuery with ttl', async () => {
+  it('useQuery with ttl (zero@0.18)', async () => {
     const { z, tableQuery } = await setupTestEnvironment()
+    if (!('updateTTL' in tableQuery)) {
+      // 0.19 removed updateTTL from the query
+      return
+    }
     const ttl = ref<TTL>('1m')
 
     const materializeSpy = vi.spyOn(tableQuery, 'materialize')
@@ -96,6 +100,40 @@ describe('useQuery', () => {
       vueViewFactory,
       '1m',
     )
+    materializeSpy.mockClear()
+
+    ttl.value = '10m'
+    await 1
+
+    expect(materializeSpy).toHaveBeenCalledTimes(0)
+    expect(updateTTLSpy).toHaveBeenCalledExactlyOnceWith('10m')
+
+    z.close()
+  })
+
+  it('useQuery with ttl (zero@0.19)', async () => {
+    const { z, tableQuery } = await setupTestEnvironment()
+    if ('updateTTL' in tableQuery) {
+      // 0.19 removed updateTTL from the query
+      return
+    }
+
+    const ttl = ref<TTL>('1m')
+
+    const materializeSpy = vi.spyOn(tableQuery, 'materialize')
+
+    const queryGetter = vi.fn(() => tableQuery)
+
+    useQuery(queryGetter, () => ({ ttl: ttl.value }))
+    expect(queryGetter).toHaveBeenCalledTimes(1)
+    expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
+      vueViewFactory,
+      '1m',
+    )
+    expect(materializeSpy).toHaveLastReturnedWith(expect.any(VueView))
+    const view: VueView<unknown> = materializeSpy.mock.results[0]!.value
+    const updateTTLSpy = vi.spyOn(view, 'updateTTL')
+
     materializeSpy.mockClear()
 
     ttl.value = '10m'

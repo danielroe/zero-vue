@@ -47,7 +47,7 @@ export function useQuery<
   )
 
   watch(ttl, (ttl) => {
-    toValue(query).updateTTL(ttl)
+    toValue(view)?.updateTTL(ttl)
   })
 
   if (getCurrentInstance()) {
