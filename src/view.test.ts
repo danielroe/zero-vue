@@ -1254,6 +1254,7 @@ describe('vueView', () => {
         { singular: false, relationships: {} },
         () => {},
         queryCompleteResolver.promise,
+        () => {},
       )
     })
 

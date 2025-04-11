@@ -10,6 +10,7 @@ import type {
   Query,
   ResultType,
   Schema,
+  TTL,
   ViewFactory,
 } from '@rocicorp/zero'
 import { applyChange } from '@rocicorp/zero'
@@ -28,6 +29,7 @@ export class VueView<V> implements Output {
   readonly #input: Input
   readonly #format: Format
   readonly #onDestroy: () => void
+  readonly #updateTTL: (ttl: TTL) => void
 
   #state: State
 
@@ -37,10 +39,12 @@ export class VueView<V> implements Output {
     format: Format = { singular: false, relationships: {} },
     onDestroy: () => void = () => {},
     queryComplete: true | Promise<true>,
+    updateTTL: (ttl: TTL) => void,
   ) {
     this.#input = input
     this.#format = format
     this.#onDestroy = onDestroy
+    this.#updateTTL = updateTTL
     this.#state = reactive([
       { '': format.singular ? undefined : [] },
       queryComplete === true ? complete : unknown,
@@ -83,6 +87,10 @@ export class VueView<V> implements Output {
   push(change: Change): void {
     this.#applyChange(change)
   }
+
+  updateTTL(ttl: TTL): void {
+    this.#updateTTL(ttl)
+  }
 }
 
 export function vueViewFactory<
@@ -90,19 +98,28 @@ export function vueViewFactory<
   TTable extends keyof TSchema['tables'] & string,
   TReturn,
 >(
-  _query: Query<TSchema, TTable, TReturn>,
+  query: Query<TSchema, TTable, TReturn>,
   input: Input,
   format: Format,
   onDestroy: () => void,
   onTransactionCommit: (cb: () => void) => void,
   queryComplete: true | Promise<true>,
+  updateTTL?: (ttl: TTL) => void,
 ) {
+  interface UpdateTTL {
+    updateTTL: (ttl: TTL) => void
+  }
   return new VueView<HumanReadable<TReturn>>(
     input,
     onTransactionCommit,
     format,
     onDestroy,
     queryComplete,
+    // In zero@0.19 updateTTL is passed in to the view factory.
+    // In zero@0.18 it was a property on the query.
+    updateTTL ?? (ttl =>
+      (query as unknown as UpdateTTL).updateTTL(ttl)
+    ),
   )
 }
 
