@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "latest",
-    "@rocicorp/resolver": "^1.0.2",
+    "@rocicorp/resolver": "1.0.2",
     "@vitest/coverage-v8": "latest",
     "bumpp": "latest",
     "changelogithub": "13.13.0",

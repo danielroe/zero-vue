@@ -19,7 +19,7 @@ importers:
         specifier: latest
         version: 4.12.0(@typescript-eslint/utils@8.29.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.0)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))
       '@rocicorp/resolver':
-        specifier: ^1.0.2
+        specifier: 1.0.2
         version: 1.0.2
       '@vitest/coverage-v8':
         specifier: latest
@@ -38,7 +38,7 @@ importers:
         version: 9.3.0
       knip:
         specifier: latest
-        version: 5.50.2(@types/node@22.14.0)(typescript@5.8.3)
+        version: 5.50.3(@types/node@22.14.0)(typescript@5.8.3)
       lint-staged:
         specifier: latest
         version: 15.5.1
@@ -2679,8 +2679,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knip@5.50.2:
-    resolution: {integrity: sha512-TGpfeeSMlaRd5wUkcb4HsVGSiQrE289LZF9qtW2TLHkAZbB2rM53wVQbXSf1KjOvJfBSZYSyYQ6q79lufrwsPw==}
+  knip@5.50.3:
+    resolution: {integrity: sha512-0A4G7UPucGTCpNh5vHSfL0+tVQIuKfJKdg8sAq6EC3COKbAchEbM+TeN4w32OrnJW9CesHs71lqftlggMVfW2A==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -6831,7 +6831,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.50.2(@types/node@22.14.0)(typescript@5.8.3):
+  knip@5.50.3(@types/node@22.14.0)(typescript@5.8.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 22.14.0
