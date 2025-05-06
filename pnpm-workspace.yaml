@@ -1,5 +1,8 @@
 packages:
   - playground
+ignoredBuiltDependencies:
+  - esbuild
+  - unrs-resolver
 onlyBuiltDependencies:
   - '@rocicorp/zero-sqlite3'
   - simple-git-hooks
