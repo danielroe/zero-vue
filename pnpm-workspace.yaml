@@ -2,6 +2,7 @@ packages:
   - playground
 ignoredBuiltDependencies:
   - esbuild
+  - protobufjs
   - unrs-resolver
 onlyBuiltDependencies:
   - '@rocicorp/zero-sqlite3'
