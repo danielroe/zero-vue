@@ -89,6 +89,7 @@ describe('useQuery', () => {
     const ttl = ref<TTL>('1m')
 
     const materializeSpy = vi.spyOn(tableQuery, 'materialize')
+    // @ts-expect-error missing from v0.19+
     const updateTTLSpy = vi.spyOn(tableQuery, 'updateTTL')
     const queryGetter = vi.fn(() => tableQuery)
 
