@@ -42,7 +42,7 @@
     "@rocicorp/resolver": "1.0.2",
     "@vitest/coverage-v8": "latest",
     "bumpp": "latest",
-    "changelogithub": "13.14.0",
+    "changelogithub": "13.15.0",
     "eslint": "latest",
     "installed-check": "latest",
     "knip": "latest",
