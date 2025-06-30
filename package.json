@@ -2,7 +2,7 @@
   "name": "zero-vue",
   "type": "module",
   "version": "0.3.1",
-  "packageManager": "pnpm@10.12.2",
+  "packageManager": "pnpm@10.12.4",
   "description": "",
   "license": "MIT",
   "repository": "danielroe/zero-vue",
@@ -35,7 +35,7 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@rocicorp/zero": "^0.20.0"
+    "@rocicorp/zero": "^0.21.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "latest",
