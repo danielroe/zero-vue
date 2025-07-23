@@ -51,7 +51,7 @@
     "typescript": "latest",
     "unbuild": "latest",
     "vitest": "latest",
-    "vue": "3.5.17"
+    "vue": "3.5.18"
   },
   "resolutions": {
     "zero-vue": "link:."
