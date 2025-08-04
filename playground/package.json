@@ -22,11 +22,11 @@
   "devDependencies": {
     "@tsconfig/node22": "22.0.2",
     "@types/js-cookie": "3.0.6",
-    "@types/node": "22.16.5",
+    "@types/node": "22.17.0",
     "@vitejs/plugin-vue": "6.0.1",
     "@vue/tsconfig": "0.7.0",
-    "typescript": "5.8.3",
+    "typescript": "5.9.2",
     "vite": "7.0.6",
-    "vue-tsc": "3.0.4"
+    "vue-tsc": "3.0.5"
   }
 }
