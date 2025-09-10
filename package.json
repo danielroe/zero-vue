@@ -44,6 +44,7 @@
     "bumpp": "latest",
     "changelogithub": "13.16.0",
     "eslint": "latest",
+    "happy-dom": "^18.0.1",
     "installed-check": "latest",
     "knip": "latest",
     "lint-staged": "latest",

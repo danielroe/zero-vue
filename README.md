@@ -19,19 +19,57 @@ npm install zero-vue
 pnpm install zero-vue
 ```
 
+Register plugin:
 ```js
-import { Zero } from '@rocicorp/zero'
-import { useQuery } from 'zero-vue'
+import { createApp } from 'vue'
+import { createZero } from 'zero-vue'
 
-// see docs: https://zero.rocicorp.dev/docs/introduction
-const z = new Zero({
+const app = createApp(App)
+// see docs for all options: https://zero.rocicorp.dev/docs/introduction
+app.use(createZero({
   userID,
   server: import.meta.env.VITE_PUBLIC_SERVER,
   schema,
   kvStore: 'mem',
-})
+}))
 
-const { data: users } = useQuery(z.query.user)
+// With computed options:
+app.use(createZero(() => ({
+  userID: userID.value,
+  server: import.meta.env.VITE_PUBLIC_SERVER,
+  schema,
+  kvStore: 'mem',
+})))
+
+// Or with a Zero instance:
+app.use(createZero(new Zero({
+  userID,
+  server: import.meta.env.VITE_PUBLIC_SERVER,
+  schema,
+  kvStore: 'mem',
+})))
+```
+
+Creating `useZero` composable:
+```ts
+import type { Mutators } from './mutators.ts'
+import type { Schema } from './schema.ts'
+import { createUseZero } from 'zero-vue'
+
+// Typed:
+export const useZero = createUseZero<Schema, Mutators>()
+
+// Untyped:
+export const useZero = createUseZero()
+```
+
+To query data:
+```js
+import { useQuery } from 'zero-vue'
+import { useZero } from './use-zero.ts'
+
+const z = useZero()
+const { data: users } = useQuery(z.value.query.user)
 ```
 
 > [!TIP]

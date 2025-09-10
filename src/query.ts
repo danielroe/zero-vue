@@ -7,11 +7,14 @@ import type { VueView } from './view'
 import {
   computed,
   getCurrentInstance,
+  hasInjectionContext,
+  inject,
   onUnmounted,
   shallowRef,
   toValue,
   watch,
 } from 'vue'
+import { zeroSymbol } from './create-zero'
 import { vueViewFactory } from './view'
 
 const DEFAULT_TTL_MS = 1_000 * 60 * 5
@@ -38,10 +41,25 @@ export function useQuery<
   })
   const view = shallowRef<VueView<HumanReadable<TReturn>> | null>(null)
 
+  const z = zeroSymbol && hasInjectionContext() ? inject(zeroSymbol) : null
+  if (!hasInjectionContext()) {
+    console.warn('Not currently in an injection context (we can\'t call `inject` here). In the future this will throw an error.')
+  }
+  else if (!z) {
+    console.warn('Zero-vue plugin not found, make sure to call app.use(createZero()). This is required in order to use Synced Queries, and not doing this will throw an error in future releases.')
+  }
+
   watch(
-    () => toValue(query),
-    (q) => {
+    [() => toValue(query), () => toValue(z)],
+    ([q, z]) => {
       view.value?.destroy()
+
+      // Only present in v0.23+
+      if (z?.materialize) {
+        view.value = z.materialize(q, vueViewFactory, { ttl: ttl.value })
+        return
+      }
+
       view.value = q.materialize(vueViewFactory, ttl.value)
     },
     { immediate: true },
