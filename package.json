@@ -2,7 +2,7 @@
   "name": "zero-vue",
   "type": "module",
   "version": "0.4.0",
-  "packageManager": "pnpm@10.17.0",
+  "packageManager": "pnpm@10.17.1",
   "description": "",
   "license": "MIT",
   "repository": "danielroe/zero-vue",
