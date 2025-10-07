@@ -38,7 +38,7 @@ describe('useQuery', () => {
   it('useQuery', async () => {
     const { z, tableQuery } = await setupTestEnvironment()
 
-    const { data: rows, status } = useQuery(() => tableQuery)
+    const { data: rows, status } = useQuery(z, () => tableQuery)
     expect(rows.value).toMatchInlineSnapshot(`[
   {
     "a": 1,
@@ -93,7 +93,7 @@ describe('useQuery', () => {
     const updateTTLSpy = vi.spyOn(tableQuery, 'updateTTL')
     const queryGetter = vi.fn(() => tableQuery)
 
-    useQuery(queryGetter, () => ({ ttl: ttl.value }))
+    useQuery(z, queryGetter, () => ({ ttl: ttl.value }))
 
     expect(queryGetter).toHaveBeenCalledTimes(1)
     expect(updateTTLSpy).toHaveBeenCalledTimes(0)
@@ -121,15 +121,16 @@ describe('useQuery', () => {
 
     const ttl = ref<TTL>('1m')
 
-    const materializeSpy = vi.spyOn(tableQuery, 'materialize')
+    const materializeSpy = vi.spyOn(z, 'materialize')
 
     const queryGetter = vi.fn(() => tableQuery)
 
-    useQuery(queryGetter, () => ({ ttl: ttl.value }))
+    useQuery(z, queryGetter, () => ({ ttl: ttl.value }))
     expect(queryGetter).toHaveBeenCalledTimes(1)
     expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
+      tableQuery,
       vueViewFactory,
-      '1m',
+      { ttl: '1m' },
     )
     expect(materializeSpy).toHaveLastReturnedWith(expect.any(VueView))
     const view: VueView<unknown> = materializeSpy.mock.results[0]!.value
@@ -151,9 +152,7 @@ describe('useQuery', () => {
 
     const a = ref(1)
 
-    const { data: rows, status } = useQuery(() =>
-      tableQuery.where('a', a.value),
-    )
+    const { data: rows, status } = useQuery(z, () => tableQuery.where('a', a.value))
 
     const rowLog: unknown[] = []
     const resultDetailsLog: unknown[] = []
@@ -210,7 +209,7 @@ describe('useQuery', () => {
   it('useQuery deps change watchEffect', async () => {
     const { z, tableQuery } = await setupTestEnvironment()
     const a = ref(1)
-    const { data: rows } = useQuery(() => tableQuery.where('a', a.value))
+    const { data: rows } = useQuery(z, () => tableQuery.where('a', a.value))
 
     let run = 0
 
