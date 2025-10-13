@@ -17,13 +17,13 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: latest
-        version: 5.4.1(@vue/compiler-sfc@3.5.22)(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
+        version: 5.4.1(@vue/compiler-sfc@3.5.22)(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
       '@rocicorp/resolver':
         specifier: 1.0.2
         version: 1.0.2
       '@vitest/coverage-v8':
         specifier: latest
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
       bumpp:
         specifier: latest
         version: 10.3.1(magicast@0.3.5)
@@ -38,10 +38,10 @@ importers:
         version: 9.3.0
       knip:
         specifier: latest
-        version: 5.64.2(@types/node@22.18.8)(typescript@5.9.3)
+        version: 5.64.3(@types/node@22.18.10)(typescript@5.9.3)
       lint-staged:
         specifier: latest
-        version: 16.2.3
+        version: 16.2.4
       simple-git-hooks:
         specifier: latest
         version: 2.13.1
@@ -53,7 +53,7 @@ importers:
         version: 3.6.1(typescript@5.9.3)(vue-tsc@3.1.1(typescript@5.9.3))(vue@3.5.22(typescript@5.9.3))
       vitest:
         specifier: latest
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
       vue:
         specifier: 3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -80,11 +80,11 @@ importers:
         specifier: 3.0.6
         version: 3.0.6
       '@types/node':
-        specifier: 22.18.8
-        version: 22.18.8
+        specifier: 22.18.10
+        version: 22.18.10
       '@vitejs/plugin-vue':
         specifier: 6.0.1
-        version: 6.0.1(vite@7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
+        version: 6.0.1(vite@7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
       '@vue/tsconfig':
         specifier: 0.8.1
         version: 0.8.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
@@ -93,7 +93,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.1.9
-        version: 7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+        version: 7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
       vue-tsc:
         specifier: 3.1.1
         version: 3.1.1(typescript@5.9.3)
@@ -1467,8 +1467,8 @@ packages:
   '@types/mysql@2.15.27':
     resolution: {integrity: sha512-YfWiV16IY0OeBfBCk8+hXKmdTKrKlwKN1MNKAPBu5JYxLwBEZl7QzeEpGnlZb3VMGJrrGmB84gXiH+ofs/TezA==}
 
-  '@types/node@22.18.8':
-    resolution: {integrity: sha512-pAZSHMiagDR7cARo/cch1f3rXy0AEXwsVsVH09FcyeJVAzCnGgmYis7P3JidtTUjyadhTeSo8TgRPswstghDaw==}
+  '@types/node@22.18.10':
+    resolution: {integrity: sha512-anNG/V/Efn/YZY4pRzbACnKxNKoBng2VTFydVu8RRs5hQjikP8CQfaeAV59VFSCzKNp90mXiVXW2QzV56rwMrg==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -3074,8 +3074,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knip@5.64.2:
-    resolution: {integrity: sha512-gyIN+ZqZjyxdsocvkZx2HMy7D9+5WAgFrTM69sGg1QZ8wZuabtanhAP8ZnroctU26sQ5bO2RSPvjnOn0pRNuKw==}
+  knip@5.64.3:
+    resolution: {integrity: sha512-P9dZetEZfSBwNBFwj55CAnPAMdzVLTTscWx6rdB8eBmPqXPji8F3L+hhWi+Xp+u9O6Xp2ClRDq2JENSK8Z04Qg==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -3099,8 +3099,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@16.2.3:
-    resolution: {integrity: sha512-1OnJEESB9zZqsp61XHH2fvpS1es3hRCxMplF/AJUDa8Ho8VrscYDIuxGrj3m8KPXbcWZ8fT9XTMUhEQmOVKpKw==}
+  lint-staged@16.2.4:
+    resolution: {integrity: sha512-Pkyr/wd90oAyXk98i/2KwfkIhoYQUMtss769FIT9hFM5ogYZwrk+GRE46yKXSg2ZGhcJ1p38Gf5gmI5Ohjg2yg==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -3408,8 +3408,8 @@ packages:
   muggle-string@0.4.1:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
 
-  nano-spawn@1.0.3:
-    resolution: {integrity: sha512-jtpsQDetTnvS2Ts1fiRdci5rx0VYws5jGyC+4IYOTnIQ/wwdf6JdomlHBwqC3bJYOvaKu0C2GSZ1A60anrYpaA==}
+  nano-spawn@2.0.0:
+    resolution: {integrity: sha512-tacvGzUY5o2D8CBh2rrwxyNojUsZNU2zjNTzKQrkgGJQTbGAfArVWXSKMBokBeeg6C7OLRGUEyoFlYbfeWQIqw==}
     engines: {node: '>=20.17'}
 
   nanoid@3.3.11:
@@ -4708,7 +4708,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@antfu/eslint-config@5.4.1(@vue/compiler-sfc@3.5.22)(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
+  '@antfu/eslint-config@5.4.1(@vue/compiler-sfc@3.5.22)(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.11.0
@@ -4717,7 +4717,7 @@ snapshots:
       '@stylistic/eslint-plugin': 5.4.0(eslint@9.37.0(jiti@2.6.0))
       '@typescript-eslint/eslint-plugin': 8.44.0(@typescript-eslint/parser@8.44.0(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3))(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)
       '@typescript-eslint/parser': 8.44.0(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)
-      '@vitest/eslint-plugin': 1.3.12(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
+      '@vitest/eslint-plugin': 1.3.12(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
       ansis: 4.1.0
       cac: 6.7.14
       eslint: 9.37.0(jiti@2.6.0)
@@ -6176,11 +6176,11 @@ snapshots:
 
   '@types/basic-auth@1.1.8':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/bunyan@1.8.11':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/chai@5.2.2':
     dependencies:
@@ -6188,7 +6188,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/debug@4.1.12':
     dependencies:
@@ -6212,15 +6212,15 @@ snapshots:
 
   '@types/memcached@2.2.10':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/ms@2.1.0': {}
 
   '@types/mysql@2.15.27':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
-  '@types/node@22.18.8':
+  '@types/node@22.18.10':
     dependencies:
       undici-types: 6.21.0
 
@@ -6228,7 +6228,7 @@ snapshots:
 
   '@types/oracledb@6.5.2':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/pg-pool@2.0.6':
     dependencies:
@@ -6236,7 +6236,7 @@ snapshots:
 
   '@types/pg@8.15.5':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
@@ -6244,7 +6244,7 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
 
   '@types/unist@3.0.3': {}
 
@@ -6393,13 +6393,13 @@ snapshots:
       '@typescript-eslint/types': 8.44.0
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-vue@6.0.1(vite@7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))':
+  '@vitejs/plugin-vue@6.0.1(vite@7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.29
-      vite: 7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vite: 7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
       vue: 3.5.22(typescript@5.9.3)
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -6414,18 +6414,18 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.3.12(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
+  '@vitest/eslint-plugin@1.3.12(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
     dependencies:
       '@typescript-eslint/scope-manager': 8.43.0
       '@typescript-eslint/utils': 8.43.0(eslint@9.37.0(jiti@2.6.0))(typescript@5.9.3)
       eslint: 9.37.0(jiti@2.6.0)
     optionalDependencies:
       typescript: 5.9.3
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -6437,13 +6437,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.4(vite@7.1.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
+  '@vitest/mocker@3.2.4(vite@7.1.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.19
     optionalDependencies:
-      vite: 7.1.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vite: 7.1.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -8056,10 +8056,10 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.64.2(@types/node@22.18.8)(typescript@5.9.3):
+  knip@5.64.3(@types/node@22.18.10)(typescript@5.9.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
       fast-glob: 3.3.3
       formatly: 0.3.0
       jiti: 2.6.0
@@ -8092,12 +8092,12 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@16.2.3:
+  lint-staged@16.2.4:
     dependencies:
       commander: 14.0.1
       listr2: 9.0.4
       micromatch: 4.0.8
-      nano-spawn: 1.0.3
+      nano-spawn: 2.0.0
       pidtree: 0.6.0
       string-argv: 0.3.2
       yaml: 2.8.1
@@ -8583,7 +8583,7 @@ snapshots:
 
   muggle-string@0.4.1: {}
 
-  nano-spawn@1.0.3: {}
+  nano-spawn@2.0.0: {}
 
   nanoid@3.3.11: {}
 
@@ -9075,7 +9075,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
       long: 5.3.2
 
   pump@3.0.3:
@@ -9642,13 +9642,13 @@ snapshots:
 
   version-guard@1.1.3: {}
 
-  vite-node@3.2.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
+  vite-node@3.2.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vite: 7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -9663,7 +9663,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@7.1.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
+  vite@7.1.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
     dependencies:
       esbuild: 0.25.9
       fdir: 6.5.0(picomatch@4.0.3)
@@ -9672,13 +9672,13 @@ snapshots:
       rollup: 4.50.1
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
       fsevents: 2.3.3
       jiti: 2.6.0
       tsx: 4.20.5
       yaml: 2.8.1
 
-  vite@7.1.9(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
+  vite@7.1.9(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
     dependencies:
       esbuild: 0.25.9
       fdir: 6.5.0(picomatch@4.0.3)
@@ -9687,17 +9687,17 @@ snapshots:
       rollup: 4.50.1
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
       fsevents: 2.3.3
       jiti: 2.6.0
       tsx: 4.20.5
       yaml: 2.8.1
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(vite@7.1.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
+      '@vitest/mocker': 3.2.4(vite@7.1.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -9715,12 +9715,12 @@ snapshots:
       tinyglobby: 0.2.15
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.1.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
-      vite-node: 3.2.4(@types/node@22.18.8)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vite: 7.1.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
+      vite-node: 3.2.4(@types/node@22.18.10)(jiti@2.6.0)(tsx@4.20.5)(yaml@2.8.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/debug': 4.1.12
-      '@types/node': 22.18.8
+      '@types/node': 22.18.10
     transitivePeerDependencies:
       - jiti
       - less
