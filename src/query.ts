@@ -49,13 +49,17 @@ export function useQuery<
       () => toValue(zero),
       refetchKey,
     ],
-    ([q, zero]) => {
+    ([q, z]) => {
       view.value?.destroy()
-      view.value = zero.materialize(
-        q,
-        vueViewFactory,
-        { ttl: ttl.value },
-      )
+      if (z?.materialize) {
+        view.value = z.materialize(
+          q,
+          vueViewFactory,
+          { ttl: ttl.value },
+        )
+        return
+      }
+      view.value = q.materialize(vueViewFactory, ttl.value)
     },
     { immediate: true },
   )

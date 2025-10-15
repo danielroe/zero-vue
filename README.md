@@ -21,16 +21,17 @@ pnpm install zero-vue
 
 ```js
 import { Zero } from '@rocicorp/zero'
-import { useQuery } from 'zero-vue'
 
-// see docs: https://zero.rocicorp.dev/docs/introduction
-const z = new Zero({
-  userID,
-  server: import.meta.env.VITE_PUBLIC_SERVER,
-  schema,
-  kvStore: 'mem',
+const { useZero, useQuery } = createZero(() => {
+  return {
+    userID,
+    server: import.meta.env.VITE_PUBLIC_SERVER,
+    schema,
+    kvStore: 'mem',
+  }
 })
 
+const z = useZero()
 const { data: users } = useQuery(z.query.user)
 ```
 
