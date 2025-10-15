@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { escapeLike } from '@rocicorp/zero'
-import { SignJWT } from 'jose'
-import Cookies from 'js-cookie'
 import { computed, ref } from 'vue'
 
-import Messages from '~/components/messages.vue'
-import { useInterval } from '~/composables/use-interval'
 import { useQuery, useZero } from '~/composables/zero'
-import { randomMessage } from '~/db/data/test-data'
 import { formatDate } from '~/utils/date'
-
-import { randInt } from '~/utils/rand'
 
 const z = useZero()
 
 const { data: users } = useQuery(z.query.user)
-const { data: mediums } = useQuery(z.query.medium)
 const { data: allMessages } = useQuery(z.query.message)
 
 const filterUser = ref('')
 const filterText = ref('')
-const action = ref<'add' | 'remove' | undefined>(undefined)
 
 const { data: filteredMessages } = useQuery(() => {
   let filtered = z.query.message
@@ -41,72 +32,6 @@ const { data: filteredMessages } = useQuery(() => {
 
 const hasFilters = computed(() => filterUser.value || filterText.value)
 
-function deleteRandomMessage() {
-  if (allMessages.value.length === 0) {
-    return false
-  }
-  const index = randInt(allMessages.value.length)
-  z.mutate.message.delete({ id: allMessages.value[index]!.id })
-
-  return true
-}
-
-function addRandomMessage() {
-  z.mutate.message.insert(randomMessage(users.value, mediums.value))
-  return true
-}
-
-function handleAction() {
-  if (action.value === 'add') {
-    return addRandomMessage()
-  }
-  else if (action.value === 'remove') {
-    return deleteRandomMessage()
-  }
-
-  return false
-}
-
-useInterval(
-  () => {
-    if (!handleAction()) {
-      action.value = undefined
-    }
-  },
-  action.value !== undefined ? 1000 / 60 : null,
-)
-
-const INITIAL_HOLD_DELAY_MS = 300
-let holdTimer: number | null = null
-function handleAddAction() {
-  addRandomMessage()
-  holdTimer = setTimeout(() => {
-    action.value = 'add'
-  }, INITIAL_HOLD_DELAY_MS)
-}
-
-function handleRemoveAction(e: MouseEvent | TouchEvent) {
-  if (z.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
-    // eslint-disable-next-line no-alert
-    alert('You must be logged in to delete. Hold shift to try anyway.')
-    return
-  }
-  deleteRandomMessage()
-
-  holdTimer = setTimeout(() => {
-    action.value = 'remove'
-  }, INITIAL_HOLD_DELAY_MS)
-}
-
-function stopAction() {
-  if (holdTimer) {
-    clearTimeout(holdTimer)
-    holdTimer = null
-  }
-
-  action.value = undefined
-}
-
 function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) {
   if (senderID !== z.userID && !e.shiftKey) {
     // eslint-disable-next-line no-alert
@@ -123,54 +48,10 @@ function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) 
     body: body ?? prev,
   })
 }
-
-async function toggleLogin() {
-  if (z.userID === 'anon') {
-    const jwt = await new SignJWT({ sub: 'ENzoNm7g4E' })
-      .setProtectedHeader({ alg: 'HS256' })
-      .sign(new TextEncoder().encode(import.meta.env.VITE_PUBLIC_AUTH_SECRET))
-    Cookies.set('jwt', jwt)
-  }
-  else {
-    Cookies.remove('jwt')
-  }
-  location.reload()
-}
-
-const user = computed(() => users.value.find(user => user.id === z.userID)?.name ?? 'anon')
 </script>
 
 <template>
   <div>
-    <div class="controls">
-      <div>
-        <button
-          @mousedown="handleAddAction"
-          @mouseup="stopAction"
-          @mouseleave="stopAction"
-          @touchstart="handleAddAction"
-          @touchend="stopAction"
-        >
-          Add Messages
-        </button>
-        <button
-          @mousedown="handleRemoveAction"
-          @mouseup="stopAction"
-          @mouseleave="stopAction"
-          @touchstart="handleRemoveAction"
-          @touchend="stopAction"
-        >
-          Remove Messages
-        </button>
-        <em>(hold down buttons to repeat)</em>
-      </div>
-      <div :style="{ justifyContent: 'end' }">
-        {{ user === 'anon' ? '' : `Logged in as ${user}` }}
-        <button @mousedown="toggleLogin">
-          {{ user === 'anon' ? 'Login' : 'Logout' }}
-        </button>
-      </div>
-    </div>
     <div class="controls">
       <div>
         From:
@@ -260,7 +141,6 @@ const user = computed(() => users.value.find(user => user.id === z.userID)?.name
         </tbody>
       </table>
     </template>
-    <Messages />
   </div>
 </template>
 

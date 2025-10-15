@@ -10,17 +10,16 @@ export function createZero<
   MD extends CustomMutatorDefs | undefined = undefined,
 >(options: () => ZeroOptions<S, MD>) {
   let zero: Zero<S, MD>
-  let lastOptions: ZeroOptions<S, MD>
 
   function useZero() {
-    watch(() => options(), (opts) => {
-      if (zero && lastOptions === opts) {
-        return
-      }
+    // Only add a watcher if the zero instance is not already initialized
+    if (zero && !zero.closed) {
+      return zero
+    }
 
+    watch(() => options(), (opts) => {
       zero?.close()
       zero = new Zero(opts)
-      lastOptions = opts
     }, {
       immediate: true,
       deep: true,
