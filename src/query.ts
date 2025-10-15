@@ -21,7 +21,7 @@ export interface UseQueryOptions {
   ttl?: TTL | undefined
 }
 
-interface QueryResult<TReturn> {
+export interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
   status: ComputedRef<QueryResultType>
   error: ComputedRef<QueryErrorDetails | undefined>
@@ -33,7 +33,7 @@ export function useQuery<
   TTable extends keyof TSchema['tables'] & string,
   TReturn,
 >(
-  zero: MaybeRefOrGetter<Zero<TSchema>>,
+  zero: MaybeRefOrGetter<Zero<TSchema, any>>,
   query: MaybeRefOrGetter<Query<TSchema, TTable, TReturn>>,
   options?: MaybeRefOrGetter<UseQueryOptions>,
 ): QueryResult<TReturn> {
