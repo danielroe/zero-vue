@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { escapeLike } from '@rocicorp/zero'
-import { SignJWT } from 'jose'
+import { decodeJwt, SignJWT } from 'jose'
 import Cookies from 'js-cookie'
 import { computed, ref } from 'vue'
 
@@ -8,11 +8,24 @@ import Messages from '~/components/messages.vue'
 import { useInterval } from '~/composables/use-interval'
 import { useQuery, useZero } from '~/composables/zero'
 import { randomMessage } from '~/db/data/test-data'
+import { schema } from '~/db/schema'
 import { formatDate } from '~/utils/date'
 
 import { randInt } from '~/utils/rand'
 
-const z = useZero()
+const encodedJWT = Cookies.get('jwt')
+const decodedJWT = encodedJWT && decodeJwt(encodedJWT)
+const userID = decodedJWT?.sub ? (decodedJWT.sub as string) : 'anon'
+
+const z = useZero({
+  userID,
+  auth: () => encodedJWT || undefined,
+  server: import.meta.env.VITE_PUBLIC_SERVER,
+  schema,
+  // This is often easier to develop with if you're frequently changing
+  // the schema. Switch to 'idb' for local-persistence.
+  kvStore: 'mem',
+})
 
 const { data: users } = useQuery(z.query.user)
 const { data: mediums } = useQuery(z.query.medium)
