@@ -19,19 +19,48 @@ npm install zero-vue
 pnpm install zero-vue
 ```
 
-```js
-import { Zero } from '@rocicorp/zero'
-import { useQuery } from 'zero-vue'
+Creating `useZero` and `useQuery` composables:
+```ts
+import { createZero } from 'zero-vue'
+import { mutators } from './mutators.ts'
+import { schema } from './schema.ts'
 
-// see docs: https://zero.rocicorp.dev/docs/introduction
-const z = new Zero({
+// see docs for all options: https://zero.rocicorp.dev/docs/introduction
+const { useZero, useQuery } = createZero({
   userID,
   server: import.meta.env.VITE_PUBLIC_SERVER,
   schema,
+  mutators,
   kvStore: 'mem',
 })
 
-const { data: users } = useQuery(z.query.user)
+// OR with computed options:
+const { useZero, useQuery } = createZero(() => ({
+  userID: userID.value,
+  server: import.meta.env.VITE_PUBLIC_SERVER,
+  schema,
+  mutators,
+  kvStore: 'mem',
+}))
+
+// OR with a Zero instance:
+const { useZero, useQuery } = createZero({
+  zero: new Zero({
+    userID,
+    server: import.meta.env.VITE_PUBLIC_SERVER,
+    schema,
+    mutators,
+    kvStore: 'mem',
+  }),
+})
+```
+
+To query data:
+```js
+import { useQuery, useZero } from './use-zero.ts'
+
+const z = useZero()
+const { data: users } = useQuery(() => z.value.query.user)
 ```
 
 > [!TIP]

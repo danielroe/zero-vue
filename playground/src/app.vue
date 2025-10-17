@@ -1,40 +1,28 @@
 <script setup lang="ts">
-import { escapeLike, Zero } from '@rocicorp/zero'
-import { decodeJwt } from 'jose'
-import Cookies from 'js-cookie'
-import { computed, ref } from 'vue'
-import { useQuery } from 'zero-vue'
+import { escapeLike } from '@rocicorp/zero'
+import { useCookies } from '@vueuse/integrations/useCookies'
 
+import { SignJWT } from 'jose'
+import { computed, ref } from 'vue'
 import { useInterval } from '~/composables/use-interval'
 import { randomMessage } from '~/db/data/test-data'
-import { schema } from '~/db/schema'
 import { formatDate } from '~/utils/date'
 import { randInt } from '~/utils/rand'
+import { useQuery, useZero } from './zero'
 
-const encodedJWT = Cookies.get('jwt')
-const decodedJWT = encodedJWT && decodeJwt(encodedJWT)
-const userID = decodedJWT?.sub ? (decodedJWT.sub as string) : 'anon'
+const cookies = useCookies()
 
-const z = new Zero({
-  userID,
-  auth: () => encodedJWT || undefined,
-  server: import.meta.env.VITE_PUBLIC_SERVER,
-  schema,
-  // This is often easier to develop with if you're frequently changing
-  // the schema. Switch to 'idb' for local-persistence.
-  kvStore: 'mem',
-})
-
-const { data: users } = useQuery(z.query.user)
-const { data: mediums } = useQuery(z.query.medium)
-const { data: allMessages } = useQuery(z.query.message)
+const z = useZero()
+const { data: users } = useQuery(() => z.value.query.user)
+const { data: mediums } = useQuery(() => z.value.query.medium)
+const { data: allMessages } = useQuery(() => z.value.query.message)
 
 const filterUser = ref('')
 const filterText = ref('')
 const action = ref<'add' | 'remove' | undefined>(undefined)
 
 const { data: filteredMessages } = useQuery(() => {
-  let filtered = z.query.message
+  let filtered = z.value.query.message
     .related('medium', medium => medium.one())
     .related('sender', sender => sender.one())
     .orderBy('timestamp', 'desc')
@@ -57,13 +45,13 @@ function deleteRandomMessage() {
     return false
   }
   const index = randInt(allMessages.value.length)
-  z.mutate.message.delete({ id: allMessages.value[index]!.id })
+  z.value.mutate.message.delete({ id: allMessages.value[index]!.id })
 
   return true
 }
 
 function addRandomMessage() {
-  z.mutate.message.insert(randomMessage(users.value, mediums.value))
+  z.value.mutate.message.insert(randomMessage(users.value, mediums.value))
   return true
 }
 
@@ -97,7 +85,7 @@ function handleAddAction() {
 }
 
 function handleRemoveAction(e: MouseEvent | TouchEvent) {
-  if (z.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
+  if (z.value.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
     // eslint-disable-next-line no-alert
     alert('You must be logged in to delete. Hold shift to try anyway.')
     return
@@ -119,7 +107,7 @@ function stopAction() {
 }
 
 function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) {
-  if (senderID !== z.userID && !e.shiftKey) {
+  if (senderID !== z.value.userID && !e.shiftKey) {
     // eslint-disable-next-line no-alert
     alert(
       'You aren\'t logged in as the sender of this message. Editing won\'t be permitted. Hold the shift key to try anyway.',
@@ -129,23 +117,25 @@ function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) 
 
   // eslint-disable-next-line no-alert
   const body = prompt('Edit message', prev)
-  z.mutate.message.update({
+  z.value.mutate.message.update({
     id,
     body: body ?? prev,
   })
 }
 
 async function toggleLogin() {
-  if (z.userID === 'anon') {
-    await fetch('/api/login')
+  if (z.value.userID === 'anon') {
+    const jwt = await new SignJWT({ sub: 'ENzoNm7g4E' })
+      .setProtectedHeader({ alg: 'HS256' })
+      .sign(new TextEncoder().encode(import.meta.env.VITE_PUBLIC_AUTH_SECRET))
+    cookies.set('jwt', jwt)
   }
   else {
-    Cookies.remove('jwt')
+    cookies.remove('jwt')
   }
-  location.reload()
 }
 
-const user = computed(() => users.value.find(user => user.id === z.userID)?.name ?? 'anon')
+const user = computed(() => users.value.find(user => user.id === z.value.userID)?.name ?? 'anon')
 </script>
 
 <template>

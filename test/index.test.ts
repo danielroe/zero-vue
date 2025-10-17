@@ -1,7 +1,6 @@
-import { createSchema, string, table, Zero } from '@rocicorp/zero'
+import { createSchema, string, table } from '@rocicorp/zero'
 import { describe, expect, it } from 'vitest'
-
-import { useQuery } from '../src/index'
+import { createZero } from '../src'
 
 describe('zero-vue', () => {
   it('works', async () => {
@@ -16,20 +15,21 @@ describe('zero-vue', () => {
       tables: [user],
     })
 
-    const z = new Zero({
+    const { useZero, useQuery } = createZero(() => ({
       userID: 'asdf',
       server: null,
       schema,
       // This is often easier to develop with if you're frequently changing
       // the schema. Switch to 'idb' for local-persistence.
       kvStore: 'mem',
-    })
+    }))
+    const z = useZero()
 
-    const { data: users } = useQuery(z.query.user)
+    const { data: users } = useQuery(z.value.query.user)
 
     expect(users.value).toEqual([])
 
-    z.mutate.user.insert({ id: 'asdf', name: 'Alice' })
+    z.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
 
     expect(users.value).toEqual([])
     await new Promise(resolve => setTimeout(resolve, 0))

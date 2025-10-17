@@ -1,1 +1,3 @@
-export { useQuery, type UseQueryOptions } from './query'
+export { createZero } from './create-zero'
+export type { QueryResult, UseQueryOptions } from './query'
+export { useQuery } from './query'

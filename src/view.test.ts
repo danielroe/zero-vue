@@ -10,6 +10,7 @@ import {
   Zero,
 } from '@rocicorp/zero'
 import { describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import { VueView, vueViewFactory } from './view'
 
 const simpleSchema = createSchema({
@@ -1275,7 +1276,7 @@ describe('vueView', () => {
     expect(view.status).toEqual('unknown')
 
     queryCompleteResolver.resolve(true)
-    await 1
+    await nextTick()
     expect(view.status).toEqual('complete')
 
     z.close()
