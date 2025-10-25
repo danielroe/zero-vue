@@ -1,13 +1,14 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { CustomMutatorDefs, HumanReadable, Query, ResultType, Schema, TTL, Zero } from '@rocicorp/zero'
+import type { CustomMutatorDefs, HumanReadable, Query, Schema, TTL, Zero } from '@rocicorp/zero'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
-import type { VueView } from './view'
+import type { QueryErrorDetails, QueryStatus, VueView } from './view'
 
 import {
   computed,
   getCurrentInstance,
   onUnmounted,
+  ref,
   shallowRef,
   toValue,
   watch,
@@ -20,9 +21,15 @@ export interface UseQueryOptions {
   ttl?: TTL | undefined
 }
 
+export interface QueryError {
+  refetch: () => void
+  details: QueryErrorDetails
+}
+
 export interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
-  status: ComputedRef<ResultType>
+  status: ComputedRef<QueryStatus>
+  error: ComputedRef<QueryError | undefined>
 }
 
 /**
@@ -60,9 +67,14 @@ export function useQueryWithZero<
     return toValue(options)?.ttl ?? DEFAULT_TTL_MS
   })
   const view = shallowRef<VueView<HumanReadable<TReturn>> | null>(null)
+  const refetchKey = ref(0)
 
   watch(
-    [() => toValue(query), () => toValue(z)],
+    [
+      () => toValue(query),
+      () => toValue(z),
+      refetchKey,
+    ],
     ([q, z]) => {
       view.value?.destroy()
 
@@ -88,5 +100,12 @@ export function useQueryWithZero<
   return {
     data: computed(() => view.value!.data),
     status: computed(() => view.value!.status),
+    error: computed(() => view.value!.error
+      ? {
+          refetch: () => { refetchKey.value++ },
+          details: view.value!.error,
+        }
+      : undefined,
+    ),
   }
 }

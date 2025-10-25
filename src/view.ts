@@ -8,22 +8,43 @@ import type {
   Input,
   Output,
   Query,
-  ResultType,
+  ReadonlyJSONValue,
   Schema,
   TTL,
   ViewFactory,
 } from '@rocicorp/zero'
+import type { Ref } from 'vue'
 import { applyChange } from '@rocicorp/zero'
-import { reactive } from 'vue'
+import { ref } from 'vue'
 
-interface QueryResultDetails {
-  readonly type: ResultType
+// zero does not export this type
+type ErroredQuery = {
+  error: 'app'
+  queryName: string
+  details: ReadonlyJSONValue
+} | {
+  error: 'zero'
+  queryName: string
+  details: ReadonlyJSONValue
+} | {
+  error: 'http'
+  queryName: string
+  status: number
+  details: ReadonlyJSONValue
 }
 
-type State = [Entry, QueryResultDetails]
+export type QueryStatus = 'complete' | 'unknown' | 'error'
 
-const complete = { type: 'complete' } as const
-const unknown = { type: 'unknown' } as const
+export type QueryErrorDetails = {
+  type: 'app'
+  queryName: string
+  details: ReadonlyJSONValue
+} | {
+  type: 'http'
+  queryName: string
+  status: number
+  details: ReadonlyJSONValue
+}
 
 export class VueView<V> implements Output {
   readonly #input: Input
@@ -31,52 +52,77 @@ export class VueView<V> implements Output {
   readonly #onDestroy: () => void
   readonly #updateTTL: (ttl: TTL) => void
 
-  #state: State
+  #data: Ref<Entry>
+  #status: Ref<QueryStatus>
+  #error: Ref<QueryErrorDetails | undefined>
 
   constructor(
     input: Input,
     onTransactionCommit: (cb: () => void) => void,
-    format: Format = { singular: false, relationships: {} },
+    format: Format,
     onDestroy: () => void = () => {},
-    queryComplete: true | Promise<true>,
+    queryComplete: true | ErroredQuery | Promise<true>,
     updateTTL: (ttl: TTL) => void,
   ) {
     this.#input = input
     this.#format = format
     this.#onDestroy = onDestroy
     this.#updateTTL = updateTTL
-    this.#state = reactive([
-      { '': format.singular ? undefined : [] },
-      queryComplete === true ? complete : unknown,
-    ])
+    this.#data = ref({ '': format.singular ? undefined : [] })
+    this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
+    // @ts-expect-error - queryComplete is a weird union type causing stack depth limit error
+    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? this.#makeError(queryComplete) : undefined)
+
     input.setOutput(this)
 
     for (const node of input.fetch({})) {
       this.#applyChange({ type: 'add', node })
     }
 
-    if (queryComplete !== true) {
+    if (queryComplete !== true && !('error' in queryComplete)) {
       void queryComplete.then(() => {
-        this.#state[1] = complete
+        this.#status.value = 'complete'
+      }).catch((error: ErroredQuery) => {
+        this.#status.value = 'error'
+        this.#error.value = this.#makeError(error)
       })
     }
   }
 
   get data() {
-    return this.#state[0][''] as V
+    return this.#data.value[''] as V
   }
 
   get status() {
-    return this.#state[1].type
+    return this.#status.value
+  }
+
+  get error() {
+    return this.#error.value
   }
 
   destroy() {
     this.#onDestroy()
   }
 
+  #makeError(error: ErroredQuery): QueryErrorDetails {
+    return error.error === 'app' || error.error === 'zero'
+      ? {
+          type: 'app',
+          queryName: error.queryName,
+          details: error.details,
+        }
+      : {
+          type: 'http',
+          queryName: error.queryName,
+          status: error.status,
+          details: error.details,
+        }
+  }
+
   #applyChange(change: Change): void {
     applyChange(
-      this.#state[0],
+      this.#data.value,
       change,
       this.#input.getSchema(),
       '',
@@ -103,7 +149,7 @@ export function vueViewFactory<
   format: Format,
   onDestroy: () => void,
   onTransactionCommit: (cb: () => void) => void,
-  queryComplete: true | Promise<true>,
+  queryComplete: true | ErroredQuery | Promise<true>,
   updateTTL?: (ttl: TTL) => void,
 ) {
   interface UpdateTTL {
