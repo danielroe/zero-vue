@@ -16,7 +16,7 @@
   "dependencies": {
     "@vueuse/integrations": "^13.9.0",
     "jose": "^6.0.0",
-    "universal-cookie": "^7.2.2",
+    "universal-cookie": "^8.0.0",
     "vue": "^3.5.13",
     "zero-vue": "latest"
   },
