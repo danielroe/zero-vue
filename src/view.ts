@@ -70,8 +70,7 @@ export class VueView<V> implements Output {
     this.#updateTTL = updateTTL
     this.#data = ref({ '': format.singular ? undefined : [] })
     this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
-    // @ts-expect-error - queryComplete is a weird union type causing stack depth limit error
-    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? this.#makeError(queryComplete) : undefined)
+    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryErrorDetails | undefined>
 
     input.setOutput(this)
 
@@ -82,9 +81,10 @@ export class VueView<V> implements Output {
     if (queryComplete !== true && !('error' in queryComplete)) {
       void queryComplete.then(() => {
         this.#status.value = 'complete'
+        this.#error.value = undefined
       }).catch((error: ErroredQuery) => {
         this.#status.value = 'error'
-        this.#error.value = this.#makeError(error)
+        this.#error.value = makeError(error)
       })
     }
   }
@@ -105,21 +105,6 @@ export class VueView<V> implements Output {
     this.#onDestroy()
   }
 
-  #makeError(error: ErroredQuery): QueryErrorDetails {
-    return error.error === 'app' || error.error === 'zero'
-      ? {
-          type: 'app',
-          queryName: error.queryName,
-          details: error.details,
-        }
-      : {
-          type: 'http',
-          queryName: error.queryName,
-          status: error.status,
-          details: error.details,
-        }
-  }
-
   #applyChange(change: Change): void {
     applyChange(
       this.#data.value,
@@ -137,6 +122,21 @@ export class VueView<V> implements Output {
   updateTTL(ttl: TTL): void {
     this.#updateTTL(ttl)
   }
+}
+
+function makeError(error: ErroredQuery): QueryErrorDetails {
+  return error.error === 'app' || error.error === 'zero'
+    ? {
+        type: 'app',
+        queryName: error.queryName,
+        details: error.details,
+      }
+    : {
+        type: 'http',
+        queryName: error.queryName,
+        status: error.status,
+        details: error.details,
+      }
 }
 
 export function vueViewFactory<
