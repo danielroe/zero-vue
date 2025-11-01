@@ -35,7 +35,7 @@ type ErroredQuery = {
 
 export type QueryStatus = 'complete' | 'unknown' | 'error'
 
-export type QueryErrorDetails = {
+export type QueryError = {
   type: 'app'
   queryName: string
   details: ReadonlyJSONValue
@@ -54,7 +54,7 @@ export class VueView<V> implements Output {
 
   #data: Ref<Entry>
   #status: Ref<QueryStatus>
-  #error: Ref<QueryErrorDetails | undefined>
+  #error: Ref<QueryError | undefined>
 
   constructor(
     input: Input,
@@ -70,7 +70,7 @@ export class VueView<V> implements Output {
     this.#updateTTL = updateTTL
     this.#data = ref({ '': format.singular ? undefined : [] })
     this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
-    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryErrorDetails | undefined>
+    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryError | undefined>
 
     input.setOutput(this)
 
@@ -124,7 +124,7 @@ export class VueView<V> implements Output {
   }
 }
 
-function makeError(error: ErroredQuery): QueryErrorDetails {
+function makeError(error: ErroredQuery): QueryError {
   return error.error === 'app' || error.error === 'zero'
     ? {
         type: 'app',

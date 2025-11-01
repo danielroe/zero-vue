@@ -2,7 +2,7 @@
 
 import type { CustomMutatorDefs, HumanReadable, Query, Schema, TTL, Zero } from '@rocicorp/zero'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
-import type { QueryErrorDetails, QueryStatus, VueView } from './view'
+import type { QueryError, QueryStatus, VueView } from './view'
 
 import {
   computed,
@@ -20,15 +20,10 @@ export interface UseQueryOptions {
   ttl?: TTL | undefined
 }
 
-export interface QueryError {
-  refetch: () => void
-  details: QueryErrorDetails
-}
-
 export interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
   status: ComputedRef<QueryStatus>
-  error: ComputedRef<QueryError | undefined>
+  error: ComputedRef<QueryError & { refetch: () => void } | undefined>
 }
 
 /**
@@ -102,7 +97,7 @@ export function useQueryWithZero<
     error: computed(() => view.value!.error
       ? {
           refetch: () => { refetchKey.value++ },
-          details: view.value!.error,
+          ...view.value!.error,
         }
       : undefined,
     ),
