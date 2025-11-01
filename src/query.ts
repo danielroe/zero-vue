@@ -8,7 +8,6 @@ import {
   computed,
   getCurrentInstance,
   onUnmounted,
-  ref,
   shallowRef,
   toValue,
   watch,
@@ -67,7 +66,7 @@ export function useQueryWithZero<
     return toValue(options)?.ttl ?? DEFAULT_TTL_MS
   })
   const view = shallowRef<VueView<HumanReadable<TReturn>> | null>(null)
-  const refetchKey = ref(0)
+  const refetchKey = shallowRef(0)
 
   watch(
     [
