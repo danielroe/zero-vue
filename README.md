@@ -21,12 +21,12 @@ pnpm install zero-vue
 
 Creating `useZero` and `useQuery` composables:
 ```ts
-import { createZero } from 'zero-vue'
+import { createZeroComposables } from 'zero-vue'
 import { mutators } from './mutators.ts'
 import { schema } from './schema.ts'
 
 // see docs for all options: https://zero.rocicorp.dev/docs/introduction
-const { useZero, useQuery } = createZero({
+const { useZero, useQuery } = createZeroComposables({
   userID,
   server: import.meta.env.VITE_PUBLIC_SERVER,
   schema,
@@ -35,7 +35,7 @@ const { useZero, useQuery } = createZero({
 })
 
 // OR with computed options:
-const { useZero, useQuery } = createZero(() => ({
+const { useZero, useQuery } = createZeroComposables(() => ({
   userID: userID.value,
   server: import.meta.env.VITE_PUBLIC_SERVER,
   schema,
@@ -44,7 +44,7 @@ const { useZero, useQuery } = createZero(() => ({
 }))
 
 // OR with a Zero instance:
-const { useZero, useQuery } = createZero({
+const { useZero, useQuery } = createZeroComposables({
   zero: new Zero({
     userID,
     server: import.meta.env.VITE_PUBLIC_SERVER,
