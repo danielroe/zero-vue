@@ -29,10 +29,11 @@ describe('zero-vue', () => {
 
     expect(users.value).toEqual([])
 
-    z.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
+    const mutation = z.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
 
     expect(users.value).toEqual([])
-    await new Promise(resolve => setTimeout(resolve, 0))
+
+    await mutation
 
     expect(users.value).toMatchInlineSnapshot(`
         [
