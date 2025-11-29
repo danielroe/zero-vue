@@ -21,13 +21,13 @@
     "zero-vue": "latest"
   },
   "devDependencies": {
-    "@tsconfig/node22": "22.0.2",
+    "@tsconfig/node22": "22.0.5",
     "@types/js-cookie": "3.0.6",
-    "@types/node": "22.18.10",
+    "@types/node": "22.19.1",
     "@vitejs/plugin-vue": "6.0.1",
     "@vue/tsconfig": "0.8.1",
     "typescript": "5.9.3",
     "vite": "7.1.11",
-    "vue-tsc": "3.1.1"
+    "vue-tsc": "3.1.5"
   }
 }
