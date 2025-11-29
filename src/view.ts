@@ -20,15 +20,18 @@ import { ref } from 'vue'
 // zero does not export this type
 type ErroredQuery = {
   error: 'app'
-  queryName: string
+  id: string
+  name: string
   details: ReadonlyJSONValue
 } | {
   error: 'zero'
-  queryName: string
+  id: string
+  name: string
   details: ReadonlyJSONValue
 } | {
   error: 'http'
-  queryName: string
+  id: string
+  name: string
   status: number
   details: ReadonlyJSONValue
 }
@@ -37,11 +40,15 @@ export type QueryStatus = 'complete' | 'unknown' | 'error'
 
 export type QueryError = {
   type: 'app'
-  queryName: string
+  id: string
+  name: string
+  message: string
   details: ReadonlyJSONValue
 } | {
   type: 'http'
-  queryName: string
+  id: string
+  name: string
+  message: string
   status: number
   details: ReadonlyJSONValue
 }
@@ -125,15 +132,20 @@ export class VueView<V> implements Output {
 }
 
 function makeError(error: ErroredQuery): QueryError {
+  const message = error.name ?? 'An unknown error occurred'
   return error.error === 'app' || error.error === 'zero'
     ? {
         type: 'app',
-        queryName: error.queryName,
+        id: error.id,
+        name: error.name,
+        message,
         details: error.details,
       }
     : {
         type: 'http',
-        queryName: error.queryName,
+        id: error.id,
+        name: error.name,
+        message,
         status: error.status,
         details: error.details,
       }

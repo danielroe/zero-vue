@@ -23,7 +23,7 @@ export interface UseQueryOptions {
 export interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
   status: ComputedRef<QueryStatus>
-  error: ComputedRef<QueryError & { refetch: () => void } | undefined>
+  error: ComputedRef<QueryError & { retry: () => void } | undefined>
 }
 
 /**
@@ -78,6 +78,10 @@ export function useQueryWithZero<
         return
       }
 
+      // For synced queries (customQueryID), we need the Zero instance (e.g. during SSR it will be undefined)
+      if (q.customQueryID)
+        return
+
       view.value = q.materialize(vueViewFactory, ttl.value)
     },
     { immediate: true },
@@ -96,7 +100,7 @@ export function useQueryWithZero<
     status: computed(() => view.value!.status),
     error: computed(() => view.value!.error
       ? {
-          refetch: () => { refetchKey.value++ },
+          retry: () => { refetchKey.value++ },
           ...view.value!.error,
         }
       : undefined,
