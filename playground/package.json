@@ -24,10 +24,10 @@
     "@tsconfig/node22": "22.0.5",
     "@types/js-cookie": "3.0.6",
     "@types/node": "24.10.1",
-    "@vitejs/plugin-vue": "6.0.1",
+    "@vitejs/plugin-vue": "6.0.2",
     "@vue/tsconfig": "0.8.1",
     "typescript": "5.9.3",
-    "vite": "7.1.11",
+    "vite": "7.2.4",
     "vue-tsc": "3.1.5"
   }
 }
