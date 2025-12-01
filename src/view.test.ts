@@ -1306,6 +1306,7 @@ describe('vueViewFactory', () => {
         onDestroy,
         onTransactionCommit,
         true,
+        () => {},
       )
     })
 
