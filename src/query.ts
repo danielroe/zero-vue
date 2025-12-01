@@ -26,28 +26,7 @@ export interface QueryResult<TReturn> {
   error: ComputedRef<QueryError & { retry: () => void } | undefined>
 }
 
-/**
- * @deprecated
- *
- * Use `useQuery` returned from `createZero` instead. This function doesn't
- * support Synced Queries, and will be removed in a future version.
- *
- * @param query The query to execute.
- * @param options Options for the query.
- * @returns The result of the query.
- */
 export function useQuery<
-  TSchema extends Schema,
-  TTable extends keyof TSchema['tables'] & string,
-  TReturn,
->(
-  query: MaybeRefOrGetter<Query<TSchema, TTable, TReturn>>,
-  options?: MaybeRefOrGetter<UseQueryOptions>,
-): QueryResult<TReturn> {
-  return useQueryWithZero(undefined as unknown as Zero<TSchema>, query, options)
-}
-
-export function useQueryWithZero<
   TSchema extends Schema,
   TTable extends keyof TSchema['tables'] & string,
   TReturn,
@@ -57,9 +36,7 @@ export function useQueryWithZero<
   query: MaybeRefOrGetter<Query<TSchema, TTable, TReturn>>,
   options?: MaybeRefOrGetter<UseQueryOptions>,
 ): QueryResult<TReturn> {
-  const ttl = computed(() => {
-    return toValue(options)?.ttl ?? DEFAULT_TTL_MS
-  })
+  const ttl = computed(() => toValue(options)?.ttl ?? DEFAULT_TTL_MS)
   const view = shallowRef<VueView<HumanReadable<TReturn>> | null>(null)
   const refetchKey = shallowRef(0)
 
@@ -71,18 +48,7 @@ export function useQueryWithZero<
     ],
     ([q, z]) => {
       view.value?.destroy()
-
-      // Only present in v0.23+
-      if (z?.materialize) {
-        view.value = z.materialize(q, vueViewFactory, { ttl: ttl.value })
-        return
-      }
-
-      // For synced queries (customQueryID), we need the Zero instance (e.g. during SSR it will be undefined)
-      if (q.customQueryID)
-        return
-
-      view.value = q.materialize(vueViewFactory, ttl.value)
+      view.value = z.materialize(q, vueViewFactory, { ttl: toValue(ttl) })
     },
     { immediate: true },
   )
@@ -96,12 +62,12 @@ export function useQueryWithZero<
   }
 
   return {
-    data: computed(() => view.value!.data),
-    status: computed(() => view.value!.status),
-    error: computed(() => view.value!.error
+    data: computed(() => view.value?.data as HumanReadable<TReturn>),
+    status: computed(() => view.value?.status ?? 'unknown'),
+    error: computed(() => view.value?.error
       ? {
           retry: () => { refetchKey.value++ },
-          ...view.value!.error,
+          ...view.value.error,
         }
       : undefined,
     ),

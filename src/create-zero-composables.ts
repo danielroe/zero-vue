@@ -3,9 +3,14 @@ import type { MaybeRefOrGetter, ShallowRef } from 'vue'
 import type { QueryResult, UseQueryOptions } from './query'
 import { Zero } from '@rocicorp/zero'
 import { shallowRef, toValue, watch } from 'vue'
-import { useQueryWithZero } from './query'
+import { useQuery as _useQuery } from './query'
 
-export function createZeroComposables<S extends Schema = Schema, MD extends CustomMutatorDefs | undefined = undefined>(optsOrZero: MaybeRefOrGetter<ZeroOptions<S, MD> | { zero: Zero<S, MD> }>) {
+export function createZeroComposables<
+  S extends Schema = Schema,
+  MD extends CustomMutatorDefs | undefined = undefined,
+>(
+  optsOrZero: MaybeRefOrGetter<ZeroOptions<S, MD> | { zero: Zero<S, MD> }>,
+) {
   let z: ShallowRef<Zero<S, MD>>
 
   function useZero(): ShallowRef<Zero<S, MD>> {
@@ -36,7 +41,7 @@ export function createZeroComposables<S extends Schema = Schema, MD extends Cust
     options?: MaybeRefOrGetter<UseQueryOptions>,
   ): QueryResult<TReturn> {
     const z = useZero()
-    return useQueryWithZero(z, query, options)
+    return _useQuery(z, query, options)
   }
 
   return {

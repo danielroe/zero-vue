@@ -162,22 +162,15 @@ export function vueViewFactory<
   onDestroy: () => void,
   onTransactionCommit: (cb: () => void) => void,
   queryComplete: true | ErroredQuery | Promise<true>,
-  updateTTL?: (ttl: TTL) => void,
+  updateTTL: (ttl: TTL) => void,
 ) {
-  interface UpdateTTL {
-    updateTTL: (ttl: TTL) => void
-  }
   return new VueView<HumanReadable<TReturn>>(
     input,
     onTransactionCommit,
     format,
     onDestroy,
     queryComplete,
-    // In zero@0.19 updateTTL is passed in to the view factory.
-    // In zero@0.18 it was a property on the query.
-    updateTTL ?? (ttl =>
-      (query as unknown as UpdateTTL).updateTTL(ttl)
-    ),
+    updateTTL,
   )
 }
 

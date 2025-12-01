@@ -1,5 +1,4 @@
 import type { TTL } from '@rocicorp/zero'
-import type { MockInstance } from 'vitest'
 import { createBuilder, createSchema, number, string, syncedQuery, table, Zero } from '@rocicorp/zero'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick, ref, watchEffect } from 'vue'
@@ -98,77 +97,23 @@ describe('useQuery', () => {
     z.value.close()
   })
 
-  it('useQuery with ttl (zero@0.18)', async () => {
+  it('useQuery with ttl', async () => {
     const { z, tableQuery, useQuery } = await setupTestEnvironment()
-    if (!('updateTTL' in tableQuery)) {
-      // 0.19 removed updateTTL from the query
-      return
-    }
 
     const ttl = ref<TTL>('1m')
 
-    const materializeSpy = vi.spyOn(tableQuery, 'materialize')
-    // @ts-expect-error missing from v0.19+
-    const updateTTLSpy = vi.spyOn(tableQuery, 'updateTTL')
-    const queryGetter = vi.fn(() => tableQuery)
-
-    useQuery(queryGetter, () => ({ ttl: ttl.value }))
-
-    expect(queryGetter).toHaveBeenCalledTimes(1)
-    expect(updateTTLSpy).toHaveBeenCalledTimes(0)
-    expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
-      vueViewFactory,
-      '1m',
-    )
-    materializeSpy.mockClear()
-
-    ttl.value = '10m'
-    await nextTick()
-
-    expect(materializeSpy).toHaveBeenCalledTimes(0)
-    expect(updateTTLSpy).toHaveBeenCalledExactlyOnceWith('10m')
-
-    z.value.close()
-  })
-
-  it('useQuery with ttl (zero@0.19)', async () => {
-    const { z, tableQuery, useQuery } = await setupTestEnvironment()
-    if ('updateTTL' in tableQuery) {
-      // 0.19 removed updateTTL from the query
-      return
-    }
-
-    const ttl = ref<TTL>('1m')
-
-    let materializeSpy: MockInstance
-    // @ts-expect-error only present in v0.23+
-    if (z.value.materialize) {
-      materializeSpy = vi.spyOn(z.value, 'materialize')
-    }
-    else {
-      materializeSpy = vi.spyOn(tableQuery, 'materialize')
-    }
-
+    const materializeSpy = vi.spyOn(z.value, 'materialize')
     const queryGetter = vi.fn(() => tableQuery)
 
     useQuery(queryGetter, () => ({ ttl: ttl.value }))
     expect(queryGetter).toHaveBeenCalledTimes(1)
 
     expect(materializeSpy).toHaveLastReturnedWith(expect.any(VueView))
-    // @ts-expect-error only present in v0.23+
-    if (z.value.materialize) {
-      expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
-        tableQuery,
-        vueViewFactory,
-        { ttl: '1m' },
-      )
-    }
-    else {
-      expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
-        vueViewFactory,
-        '1m',
-      )
-    }
+    expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
+      tableQuery,
+      vueViewFactory,
+      { ttl: '1m' },
+    )
 
     const view: VueView<unknown> = materializeSpy.mock.results[0]!.value
     const updateTTLSpy = vi.spyOn(view, 'updateTTL')
@@ -329,7 +274,7 @@ describe('useQuery', () => {
     await z.mutate.table.insert({ a: 1, b: 'a' })
     await z.mutate.table.insert({ a: 2, b: 'b' })
 
-    const { data: rows, status } = useQuery(() => z.query.table)
+    const { data: rows, status } = useQuery(z, () => z.query.table)
     expect(rows.value).toMatchInlineSnapshot(`[
   {
     "a": 1,
