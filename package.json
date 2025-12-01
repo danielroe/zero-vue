@@ -32,13 +32,14 @@
     "test:types": "tsc --noEmit && pnpm -r test:types"
   },
   "peerDependencies": {
-    "@rocicorp/zero": "^0.24.3000000000",
     "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "@rocicorp/zero": "0.24.3000000000"
   },
   "devDependencies": {
     "@antfu/eslint-config": "latest",
     "@rocicorp/resolver": "1.0.2",
-    "@rocicorp/zero": "0.24.3000000000",
     "@vitest/coverage-v8": "latest",
     "bumpp": "latest",
     "changelogithub": "14.0.0",
