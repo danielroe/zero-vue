@@ -1,6 +1,6 @@
 import type { TTL } from '@rocicorp/zero'
 import { createBuilder, createSchema, number, string, syncedQuery, table, Zero } from '@rocicorp/zero'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { nextTick, ref, watchEffect } from 'vue'
 import { createZeroComposables } from './create-zero-composables'
 import { useQuery } from './query'
@@ -32,22 +32,24 @@ async function setupTestEnvironment() {
   await z.value.mutate.table.insert({ a: 2, b: 'b' })
 
   const builder = createBuilder(schema)
-  const byIdQuery = syncedQuery
-    ? syncedQuery(
-        'byId',
-        ([id]) => {
-          if (typeof id !== 'number') {
-            throw new TypeError('id must be a number')
-          }
-          return [id] as const
-        },
-        (id: number) => {
-          return builder.table.where('a', id)
-        },
-      )
-    : undefined
+  const byIdQuery = syncedQuery(
+    'byId',
+    ([id]) => {
+      if (typeof id !== 'number') {
+        throw new TypeError('id must be a number')
+      }
+      return [id] as const
+    },
+    (id: number) => {
+      return builder.table.where('a', id)
+    },
+  )
 
   const tableQuery = z!.value.query.table
+
+  onTestFinished(() => {
+    z.value.close()
+  })
 
   return { z, tableQuery, useQuery, byIdQuery, userID }
 }
@@ -93,8 +95,6 @@ describe('useQuery', () => {
 
     // TODO: this is not working at the moment, possibly because we don't have a server connection in test
     // expect(resultType.value).toEqual("complete");
-
-    z.value.close()
   })
 
   it('useQuery with ttl', async () => {
@@ -125,12 +125,10 @@ describe('useQuery', () => {
 
     expect(materializeSpy).toHaveBeenCalledTimes(0)
     expect(updateTTLSpy).toHaveBeenCalledExactlyOnceWith('10m')
-
-    z.value.close()
   })
 
   it('useQuery deps change', async () => {
-    const { z, tableQuery, useQuery } = await setupTestEnvironment()
+    const { tableQuery, useQuery } = await setupTestEnvironment()
 
     const a = ref(1)
 
@@ -186,8 +184,6 @@ describe('useQuery', () => {
 
     expect(rowLog).toEqual([])
     // expect(resultDetailsLog).toEqual(["complete"]);
-
-    z.value.close()
   })
 
   it('useQuery deps change watchEffect', async () => {
@@ -238,12 +234,10 @@ describe('useQuery', () => {
         run++
       })
     })
-
-    z.value.close()
   })
 
   it('useQuery with syncedQuery', async () => {
-    const { z, byIdQuery, useQuery } = await setupTestEnvironment()
+    const { byIdQuery, useQuery } = await setupTestEnvironment()
     if (!byIdQuery) {
       return
     }
@@ -260,8 +254,6 @@ describe('useQuery', () => {
   },
 ]`)
     expect(status.value).toEqual('unknown')
-
-    z.value.close()
   })
 
   it('can still be used without createZero', async () => {
