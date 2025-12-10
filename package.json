@@ -35,23 +35,23 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@rocicorp/zero": "^0.24.3000000000"
+    "@rocicorp/zero": "catalog:deps"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "latest",
-    "@rocicorp/resolver": "1.0.2",
-    "@vitest/coverage-v8": "latest",
-    "bumpp": "latest",
-    "changelogithub": "14.0.0",
-    "eslint": "latest",
-    "installed-check": "latest",
-    "knip": "latest",
-    "lint-staged": "latest",
-    "simple-git-hooks": "latest",
-    "typescript": "latest",
-    "unbuild": "latest",
-    "vitest": "latest",
-    "vue": "3.5.25"
+    "@antfu/eslint-config": "catalog:lint",
+    "@rocicorp/resolver": "catalog:test",
+    "@vitest/coverage-v8": "catalog:test",
+    "bumpp": "catalog:dev",
+    "changelogithub": "catalog:dev",
+    "eslint": "catalog:lint",
+    "installed-check": "catalog:dev",
+    "knip": "catalog:dev",
+    "lint-staged": "catalog:lint",
+    "simple-git-hooks": "catalog:dev",
+    "typescript": "catalog:dev",
+    "unbuild": "catalog:bundling",
+    "vitest": "catalog:test",
+    "vue": "catalog:peer"
   },
   "resolutions": {
     "zero-vue": "link:."

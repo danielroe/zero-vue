@@ -1,5 +1,45 @@
+catalogMode: prefer
+shellEmulator: true
+trustPolicy: no-downgrade
+
 packages:
   - playground
+
+catalogs:
+  bundling:
+    '@vitejs/plugin-vue': 6.0.2
+    unbuild: latest
+  deps:
+    '@rocicorp/zero': ^0.24.3000000000
+  dev:
+    bumpp: latest
+    changelogithub: 14.0.0
+    installed-check: latest
+    knip: latest
+    simple-git-hooks: latest
+    typescript: 5.9.3
+    vue-tsc: 3.1.5
+  lint:
+    '@antfu/eslint-config': latest
+    eslint: latest
+    lint-staged: latest
+  peer:
+    vue: ^3.5.13
+  playground:
+    '@vueuse/integrations': ^14.0.0
+    jose: ^6.0.0
+    universal-cookie: ^8.0.0
+    vite: 7.2.6
+    zero-vue: latest
+  test:
+    '@rocicorp/resolver': 1.0.2
+    '@vitest/coverage-v8': latest
+    vitest: latest
+  types:
+    '@tsconfig/node22': 22.0.5
+    '@types/js-cookie': 3.0.6
+    '@types/node': 24.10.1
+    '@vue/tsconfig': 0.8.1
 
 ignoredBuiltDependencies:
   - esbuild

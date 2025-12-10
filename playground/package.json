@@ -14,20 +14,20 @@
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
-    "@vueuse/integrations": "^14.0.0",
-    "jose": "^6.0.0",
-    "universal-cookie": "^8.0.0",
-    "vue": "^3.5.13",
-    "zero-vue": "latest"
+    "@vueuse/integrations": "catalog:playground",
+    "jose": "catalog:playground",
+    "universal-cookie": "catalog:playground",
+    "vue": "catalog:peer",
+    "zero-vue": "catalog:playground"
   },
   "devDependencies": {
-    "@tsconfig/node22": "22.0.5",
-    "@types/js-cookie": "3.0.6",
-    "@types/node": "24.10.1",
-    "@vitejs/plugin-vue": "6.0.2",
-    "@vue/tsconfig": "0.8.1",
-    "typescript": "5.9.3",
-    "vite": "7.2.6",
-    "vue-tsc": "3.1.5"
+    "@tsconfig/node22": "catalog:types",
+    "@types/js-cookie": "catalog:types",
+    "@types/node": "catalog:types",
+    "@vitejs/plugin-vue": "catalog:bundling",
+    "@vue/tsconfig": "catalog:types",
+    "typescript": "catalog:dev",
+    "vite": "catalog:playground",
+    "vue-tsc": "catalog:dev"
   }
 }
