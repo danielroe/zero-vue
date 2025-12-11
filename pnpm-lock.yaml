@@ -58,7 +58,7 @@ importers:
         specifier: 3.5.25
         version: 3.5.25(typescript@5.9.3)
       zod:
-        specifier: ^4.1.13
+        specifier: 4.1.13
         version: 4.1.13
 
   playground:
