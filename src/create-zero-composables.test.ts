@@ -71,16 +71,15 @@ describe('createZeroComposables', () => {
 
     expect(zero.value.userID).toEqual('test-user')
 
-    // const oldZero = zero.value
+    const oldZero = zero.value
 
     userID.value = 'test-user-2'
     await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 1))
 
     expect(zero.value.userID).toEqual('test-user-2')
     expect(zero.value.closed).toBe(false)
-
-    // TODO: Figure out a way to test this, since closing is async
-    // expect(oldZero.closed).toBe(true)
+    expect(oldZero.closed).toBe(true)
   })
 
   it('useQuery works whithout explicitly calling useZero', async () => {
@@ -148,16 +147,15 @@ describe('createZeroComposables', () => {
 
     expect(usedZero.value.userID).toEqual('test-user')
 
-    // const oldZero = usedZero.value
+    const oldZero = usedZero.value
 
     userID.value = 'test-user-2'
     await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 1))
 
     expect(usedZero.value.userID).toEqual('test-user-2')
     expect(usedZero.value.closed).toBe(false)
-
-    // TODO: Figure out a way to test this, since closing is async
-    // expect(oldZero.closed).toBe(true)
+    expect(oldZero.closed).toBe(true)
   })
 
   it('is created lazily and once', async () => {
