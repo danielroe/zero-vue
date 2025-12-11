@@ -15,7 +15,7 @@ import {
   table,
   Zero,
 } from '@rocicorp/zero'
-import { describe, expect, it, vi } from 'vitest'
+import { assert, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import z from 'zod'
 import { addContextToQuery } from './query'
@@ -294,6 +294,9 @@ describe('vueView', () => {
     const { zero, mutators, tableQuery } = setupSimple()
 
     const view = zero.materialize(tableQuery, vueViewFactory)
+    assert(view.data)
+    assert(typeof view.data === 'object')
+    assert('length' in view.data)
     expect(view.data?.length).toBe(0)
 
     for (const i in [...Array.from({ length: iterations }).keys()]) {
