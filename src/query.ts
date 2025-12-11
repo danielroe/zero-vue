@@ -1,6 +1,18 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { CustomMutatorDefs, DefaultContext, DefaultSchema, HumanReadable, PullRow, Query, QueryOrQueryRequest, ReadonlyJSONValue, Schema, TTL, Zero } from '@rocicorp/zero'
+import type {
+  CustomMutatorDefs,
+  DefaultContext,
+  DefaultSchema,
+  HumanReadable,
+  PullRow,
+  Query,
+  QueryOrQueryRequest,
+  ReadonlyJSONValue,
+  Schema,
+  TTL,
+  Zero,
+} from '@rocicorp/zero'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { QueryError, QueryStatus, VueView } from './view'
 

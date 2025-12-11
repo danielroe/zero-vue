@@ -1385,7 +1385,7 @@ describe('vueView', () => {
   })
 })
 
-describe.skip('vueViewFactory', () => {
+describe('vueViewFactory', () => {
   interface TestReturn {
     a: number
     b: string
@@ -1401,7 +1401,7 @@ describe.skip('vueViewFactory', () => {
 
     const view = zero.materialize(tableQuery, (_, input) => {
       return vueViewFactory(
-        undefined as unknown as Query<typeof simpleSchema, 'table', TestReturn>,
+        undefined as unknown as Query<'table', typeof simpleSchema, TestReturn>,
         input,
         { singular: false, relationships: {} },
         onDestroy,

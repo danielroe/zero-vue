@@ -1,4 +1,13 @@
-import type { CustomMutatorDefs, DefaultContext, DefaultSchema, PullRow, QueryOrQueryRequest, ReadonlyJSONValue, Schema, ZeroOptions } from '@rocicorp/zero'
+import type {
+  CustomMutatorDefs,
+  DefaultContext,
+  DefaultSchema,
+  PullRow,
+  QueryOrQueryRequest,
+  ReadonlyJSONValue,
+  Schema,
+  ZeroOptions,
+} from '@rocicorp/zero'
 import type { MaybeRefOrGetter, ShallowRef } from 'vue'
 import type { QueryResult, UseQueryOptions } from './query'
 import { Zero } from '@rocicorp/zero'
@@ -29,7 +38,10 @@ export function createZeroComposables<
       }
 
       z.value = 'zero' in opts ? opts.zero : new Zero(opts)
-    }, { deep: true, immediate: true })
+    }, {
+      deep: 1,
+      immediate: true,
+    })
 
     return z
   }
