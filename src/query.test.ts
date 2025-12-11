@@ -27,9 +27,9 @@ async function setupTestEnvironment() {
     kvStore: 'mem',
   }))
 
-  const z = useZero()
-  await z.value.mutate.table.insert({ a: 1, b: 'a' })
-  await z.value.mutate.table.insert({ a: 2, b: 'b' })
+  const zero = useZero()
+  await zero.value.mutate.table.insert({ a: 1, b: 'a' })
+  await zero.value.mutate.table.insert({ a: 2, b: 'b' })
 
   const builder = createBuilder(schema)
   const byIdQuery = syncedQuery(
@@ -45,13 +45,13 @@ async function setupTestEnvironment() {
     },
   )
 
-  const tableQuery = z!.value.query.table
+  const tableQuery = zero!.value.query.table
 
   onTestFinished(() => {
-    z.value.close()
+    zero.value.close()
   })
 
-  return { z, tableQuery, useQuery, byIdQuery, userID }
+  return { z: zero, tableQuery, useQuery, byIdQuery, userID }
 }
 
 describe('useQuery', () => {
@@ -257,16 +257,16 @@ describe('useQuery', () => {
   })
 
   it('can still be used without createZero', async () => {
-    const z = new Zero({
+    const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema,
       kvStore: 'mem' as const,
     })
-    await z.mutate.table.insert({ a: 1, b: 'a' })
-    await z.mutate.table.insert({ a: 2, b: 'b' })
+    await zero.mutate.table.insert({ a: 1, b: 'a' })
+    await zero.mutate.table.insert({ a: 2, b: 'b' })
 
-    const { data: rows, status } = useQuery(z, () => z.query.table)
+    const { data: rows, status } = useQuery(zero, () => zero.query.table)
     expect(rows.value).toMatchInlineSnapshot(`[
   {
     "a": 1,
@@ -281,6 +281,6 @@ describe('useQuery', () => {
 ]`)
     expect(status.value).toEqual('unknown')
 
-    z.close()
+    zero.close()
   })
 })

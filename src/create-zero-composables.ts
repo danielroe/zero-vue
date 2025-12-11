@@ -40,8 +40,8 @@ export function createZeroComposables<
     query: MaybeRefOrGetter<Query<S, TTable, TReturn>>,
     options?: MaybeRefOrGetter<UseQueryOptions>,
   ): QueryResult<TReturn> {
-    const z = useZero()
-    return _useQuery(z, query, options)
+    const zero = useZero()
+    return _useQuery(zero, query, options)
   }
 
   return {

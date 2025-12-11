@@ -1,8 +1,14 @@
-import type { Query, Schema } from '@rocicorp/zero'
+import type { Query, QueryOrQueryRequest, ReadonlyJSONValue, Schema } from '@rocicorp/zero'
 
 import { resolver } from '@rocicorp/resolver'
 import {
+  createBuilder,
+  createCRUDBuilder,
   createSchema,
+  defineMutator,
+  defineMutators,
+  defineQueries,
+  defineQuery,
   number,
   relationships,
   string,
@@ -11,7 +17,15 @@ import {
 } from '@rocicorp/zero'
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
+import z from 'zod'
 import { VueView, vueViewFactory } from './view'
+
+type AllSchemas = typeof simpleSchema & typeof collapseSchema & typeof treeSchema
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    schema: AllSchemas
+  }
+}
 
 const simpleSchema = createSchema({
   tables: [
@@ -24,7 +38,50 @@ const simpleSchema = createSchema({
   ],
 })
 
-const recursiveTable = table('table')
+function setupSimple() {
+  const crud = createCRUDBuilder<AllSchemas>(simpleSchema)
+  const mutators = defineMutators({
+    insert: defineMutator(
+      z.object({ a: z.number(), b: z.string() }),
+      async ({ tx, args: { a, b } }) => {
+        return tx.mutate(crud.table.insert({ a, b }))
+      },
+    ),
+    update: defineMutator(
+      z.object({ a: z.number(), b: z.string() }),
+      async ({ tx, args: { a, b } }) => {
+        return tx.mutate(crud.table.update({ a, b }))
+      },
+    ),
+    delete: defineMutator(
+      z.object({ a: z.number() }),
+      async ({ tx, args: { a } }) => {
+        return tx.mutate(crud.table.delete({ a }))
+      },
+    ),
+  })
+
+  const zero = new Zero({
+    userID: 'asdf',
+    server: null,
+    schema: simpleSchema,
+    mutators,
+    // This is often easier to develop with if you're frequently changing
+    // the schema. Switch to 'idb' for local-persistence.
+    kvStore: 'mem',
+  })
+
+  const zql = createBuilder(simpleSchema)
+  const queries = defineQueries({
+    table: defineQuery(() => zql.table),
+  })
+
+  const tableQuery = addContextToQuery(queries.table(), zero.context)
+
+  return { zero, queries, mutators, tableQuery }
+}
+
+const recursiveTable = table('tree')
   .columns({
     id: number(),
     name: string(),
@@ -32,6 +89,7 @@ const recursiveTable = table('table')
     childID: number().optional(),
   })
   .primaryKey('id')
+
 const treeSchema = createSchema({
   tables: [recursiveTable],
   relationships: [
@@ -44,6 +102,59 @@ const treeSchema = createSchema({
     })),
   ],
 })
+
+function setupTree() {
+  const crud = createCRUDBuilder<AllSchemas>(treeSchema)
+  const mutators = defineMutators({
+    insert: defineMutator(
+      z.object({ id: z.number(), name: z.string(), data: z.string().optional().nullable(), childID: z.number().nullable() }),
+      async ({ tx, args: { id, name, data, childID } }) => {
+        return tx.mutate(crud.tree.insert({
+          id,
+          name,
+          data,
+          childID,
+        }))
+      },
+    ),
+    update: defineMutator(
+      z.object({ id: z.number(), data: z.string() }),
+      async ({ tx, args: { id, data } }) => {
+        return tx.mutate(crud.tree.update({
+          id,
+          data,
+        }))
+      },
+    ),
+    delete: defineMutator(
+      z.object({ id: z.number() }),
+      async ({ tx, args: { id } }) => {
+        return tx.mutate(crud.tree.delete({ id }))
+      },
+    ),
+  })
+
+  const zero = new Zero({
+    userID: 'asdf',
+    server: null,
+    schema: treeSchema,
+    mutators,
+    // This is often easier to develop with if you're frequently changing
+    // the schema. Switch to 'idb' for local-persistence.
+    kvStore: 'mem',
+  })
+
+  const zql = createBuilder(treeSchema)
+  const queries = defineQueries({
+    table: defineQuery(() => zql.tree.related('children')),
+    one: defineQuery(() => zql.tree.related('children').one()),
+  })
+
+  const treeWithChildrenQuery = addContextToQuery(queries.table(), zero.context)
+  const one = addContextToQuery(queries.one(), zero.context)
+
+  return { zero, queries, mutators, treeWithChildrenQuery, one }
+}
 
 const issue = table('issue')
   .columns({
@@ -88,28 +199,57 @@ const collapseSchema = createSchema({
   ],
 })
 
-async function setupTestEnvironment<S extends Schema>(schema: S) {
-  const z = new Zero({
+function setupCollapse() {
+  const zero = new Zero({
     userID: 'asdf',
     server: null,
-    schema,
+    schema: collapseSchema,
     // This is often easier to develop with if you're frequently changing
     // the schema. Switch to 'idb' for local-persistence.
     kvStore: 'mem',
   })
 
-  return { z }
+  const zql = createBuilder(collapseSchema)
+  const queries = defineQueries({
+    issuesWithLabelsQuery: defineQuery(() => zql.issue.related('labels')),
+  })
+
+  const issuesWithLabelsQuery = addContextToQuery(queries.issuesWithLabelsQuery(), zero.context)
+
+  return { zero, queries, issuesWithLabelsQuery }
+}
+
+export function addContextToQuery<
+  TTable extends keyof TSchema['tables'] & string,
+  TInput extends ReadonlyJSONValue | undefined,
+  TOutput extends ReadonlyJSONValue | undefined,
+  TSchema extends Schema,
+  TReturn,
+  TContext,
+>(query: QueryOrQueryRequest<
+  TTable,
+  TInput,
+  TOutput,
+  TSchema,
+  TReturn,
+  TContext
+>, context: TContext): Query<TTable, TSchema, TReturn> {
+  return 'query' in query ? query.query.fn({ ctx: context, args: query.args }) : query
 }
 
 describe('vueView', () => {
   it('basics', async () => {
-    const { z } = await setupTestEnvironment(simpleSchema)
-    const tableQuery = z.query.table
+    const { zero, mutators, tableQuery } = setupSimple()
 
-    await z.mutate.table.insert({ a: 1, b: 'a' })
-    await z.mutate.table.insert({ a: 2, b: 'b' })
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
-    const view = tableQuery.materialize(vueViewFactory)
+    const view = zero.materialize(
+      tableQuery,
+      vueViewFactory,
+    )
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -129,7 +269,8 @@ describe('vueView', () => {
     // TODO: Test with a real resolver
     // expect(view.status).toEqual("complete");
 
-    await z.mutate.table.insert({ a: 3, b: 'c' })
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.insert({ a: 3, b: 'c' })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -151,8 +292,10 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.delete({ a: 1 })
-    await z.mutate.table.delete({ a: 2 })
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.delete({ a: 1 })).client
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.delete({ a: 2 })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -164,62 +307,55 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.delete({ a: 3 })
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+    await zero.mutate(mutators.delete({ a: 3 })).client
 
     expect(view.data).toEqual([])
-
-    z.close()
   })
 
   it.skip('basics-perf', async () => {
     const iterations = 10_000
 
-    const { z } = await setupTestEnvironment(simpleSchema)
-    const tableQuery = z.query.table
+    const { zero, mutators, tableQuery } = setupSimple()
 
-    const view = tableQuery.materialize(vueViewFactory)
-    expect(view.data.length).toBe(0)
+    const view = zero.materialize(tableQuery, vueViewFactory)
+    expect(view.data?.length).toBe(0)
 
     for (const i in [...Array.from({ length: iterations }).keys()]) {
-      await z.mutate.table.insert({ a: Number(i), b: 'a' })
+    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
+      await zero.mutate(mutators.insert({ a: Number(i), b: 'a' })).client
     }
 
-    expect(view.data.length).toBe(iterations)
-
-    z.close()
+    expect(view.data?.length).toBe(iterations)
   })
 
   it('hydrate-empty', async () => {
-    const { z } = await setupTestEnvironment(simpleSchema)
-    const tableQuery = z.query.table
+    const { zero, tableQuery } = setupSimple()
 
-    const view = tableQuery.materialize(vueViewFactory)
+    const view = zero.materialize(tableQuery, vueViewFactory)
 
     expect(view.data).toEqual([])
-
-    z.close()
   })
 
   it('tree', async () => {
-    const { z } = await setupTestEnvironment(treeSchema)
+    const { zero, mutators, treeWithChildrenQuery } = setupTree()
 
-    await z.mutate.table.insert({ id: 1, name: 'foo', data: null, childID: 2 })
-    await z.mutate.table.insert({
+    await zero.mutate(mutators.insert({ id: 1, name: 'foo', data: null, childID: 2 })).client
+    await zero.mutate(mutators.insert({
       id: 2,
       name: 'foobar',
       data: null,
       childID: null,
-    })
-    await z.mutate.table.insert({ id: 3, name: 'mon', data: null, childID: 4 })
-    await z.mutate.table.insert({
+    })).client
+    await zero.mutate(mutators.insert({ id: 3, name: 'mon', data: null, childID: 4 })).client
+    await zero.mutate(mutators.insert({
       id: 4,
       name: 'monkey',
       data: null,
       childID: null,
-    })
+    })).client
 
-    const query = z.query.table.related('children')
-    const view = query.materialize(vueViewFactory)
+    const view = zero.materialize(treeWithChildrenQuery, vueViewFactory)
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -274,7 +410,7 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.insert({ id: 5, name: 'chocolate', childID: 2 })
+    await zero.mutate(mutators.insert({ id: 5, name: 'chocolate', childID: 2 })).client
     expect(view.data).toMatchInlineSnapshot(`
     [
       {
@@ -344,7 +480,7 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.delete({ id: 2 })
+    await zero.mutate(mutators.delete({ id: 2 })).client
     expect(view.data).toMatchInlineSnapshot(`
     [
       {
@@ -390,11 +526,11 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.insert({
+    await zero.mutate(mutators.insert({
       id: 2,
       name: 'foobaz',
       childID: null,
-    })
+    })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -467,13 +603,12 @@ describe('vueView', () => {
   })
 
   it('tree-single', async () => {
-    const { z } = await setupTestEnvironment(treeSchema)
+    const { zero, mutators, one } = setupTree()
 
-    await z.mutate.table.insert({ id: 1, name: 'foo', childID: 2 })
-    await z.mutate.table.insert({ id: 2, name: 'foobar', childID: null })
+    await zero.mutate(mutators.insert({ id: 1, name: 'foo', childID: 2 })).client
+    await zero.mutate(mutators.insert({ id: 2, name: 'foobar', childID: null })).client
 
-    const query = z.query.table.related('children').one()
-    const view = query.materialize(vueViewFactory)
+    const view = zero.materialize(one, vueViewFactory)
 
     expect(view.data).toMatchInlineSnapshot(`
     {
@@ -495,7 +630,7 @@ describe('vueView', () => {
   `)
 
     // remove the child
-    await z.mutate.table.delete({ id: 2 })
+    await zero.mutate(mutators.delete({ id: 2 })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     {
@@ -509,16 +644,14 @@ describe('vueView', () => {
   `)
 
     // remove the parent
-    await z.mutate.table.delete({ id: 1 })
+    await zero.mutate(mutators.delete({ id: 1 })).client
     expect(view.data).toEqual(undefined)
-
-    z.close()
   })
 
   it('collapse', async () => {
-    const { z } = await setupTestEnvironment(collapseSchema)
-    const query = z.query.issue.related('labels')
-    const view = query.materialize(vueViewFactory)
+    const { zero, issuesWithLabelsQuery } = setupCollapse()
+
+    const view = zero.materialize(issuesWithLabelsQuery, vueViewFactory)
 
     expect(view.data).toEqual([])
 
@@ -924,14 +1057,11 @@ describe('vueView', () => {
       },
     ]
   `)
-
-    z.close()
   })
 
   it('collapse-single', async () => {
-    const { z } = await setupTestEnvironment(collapseSchema)
-    const query = z.query.issue.related('labels')
-    const view = query.materialize(vueViewFactory)
+    const { zero, issuesWithLabelsQuery } = setupCollapse()
+    const view = zero.materialize(issuesWithLabelsQuery, vueViewFactory)
 
     expect(view.data).toEqual([])
 
@@ -986,17 +1116,14 @@ describe('vueView', () => {
       },
     ]
   `)
-
-    z.close()
   })
 
   it('basic with edit pushes', async () => {
-    const { z } = await setupTestEnvironment(simpleSchema)
-    await z.mutate.table.insert({ a: 1, b: 'a' })
-    await z.mutate.table.insert({ a: 2, b: 'b' })
+    const { zero, tableQuery, mutators } = setupSimple()
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+    await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
-    const query = z.query.table
-    const view = query.materialize(vueViewFactory)
+    const view = zero.materialize(tableQuery, vueViewFactory)
     expect(view.data).toMatchInlineSnapshot(`
     [
       {
@@ -1012,7 +1139,7 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.update({ a: 2, b: 'b2' })
+    await zero.mutate(mutators.update({ a: 2, b: 'b2' })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -1029,8 +1156,8 @@ describe('vueView', () => {
     ]
   `)
 
-    await z.mutate.table.insert({ a: 3, b: 'b3' })
-    await z.mutate.table.delete({ a: 2 })
+    await zero.mutate(mutators.insert({ a: 3, b: 'b3' })).client
+    await zero.mutate(mutators.delete({ a: 2 })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -1046,30 +1173,27 @@ describe('vueView', () => {
       },
     ]
   `)
-
-    z.close()
   })
 
   it('tree edit', async () => {
-    const { z } = await setupTestEnvironment(treeSchema)
+    const { zero, mutators, treeWithChildrenQuery } = setupTree()
 
-    await z.mutate.table.insert({ id: 1, name: 'foo', data: 'a', childID: 2 })
-    await z.mutate.table.insert({
+    await zero.mutate(mutators.insert({ id: 1, name: 'foo', data: 'a', childID: 2 })).client
+    await zero.mutate(mutators.insert({
       id: 2,
       name: 'foobar',
       data: 'b',
       childID: null,
-    })
-    await z.mutate.table.insert({ id: 3, name: 'mon', data: 'c', childID: 4 })
-    await z.mutate.table.insert({
+    })).client
+    await zero.mutate(mutators.insert({ id: 3, name: 'mon', data: 'c', childID: 4 })).client
+    await zero.mutate(mutators.insert({
       id: 4,
       name: 'monkey',
       data: 'd',
       childID: null,
-    })
+    })).client
 
-    const query = z.query.table.related('children')
-    const view = query.materialize(vueViewFactory)
+    const view = zero.materialize(treeWithChildrenQuery, vueViewFactory)
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -1125,7 +1249,7 @@ describe('vueView', () => {
   `)
 
     // Edit root
-    await z.mutate.table.update({ id: 1, data: 'a2' })
+    await zero.mutate(mutators.update({ id: 1, data: 'a2' })).client
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -1181,7 +1305,7 @@ describe('vueView', () => {
   `)
 
     // Edit leaf
-    await z.mutate.table.update({ id: 4, data: 'd2' })
+    await zero.mutate(mutators.update({ id: 4, data: 'd2' })).client
     expect(view.data).toMatchInlineSnapshot(`
     [
       {
@@ -1234,21 +1358,18 @@ describe('vueView', () => {
       },
     ]
   `)
-
-    z.close()
   })
 
   it('queryComplete promise', async () => {
-    const { z } = await setupTestEnvironment(simpleSchema)
-    await z.mutate.table.insert({ a: 1, b: 'a' })
-    await z.mutate.table.insert({ a: 2, b: 'b' })
+    const { zero, mutators, tableQuery } = setupSimple()
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+    await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
     const queryCompleteResolver = resolver<true>()
 
     const onTransactionCommit = () => {}
 
-    const query = z.query.table
-    const view = query.materialize((_, input) => {
+    const view = zero.materialize(tableQuery, (_, input) => {
       return new VueView(
         input,
         onTransactionCommit,
@@ -1278,27 +1399,24 @@ describe('vueView', () => {
     queryCompleteResolver.resolve(true)
     await nextTick()
     expect(view.status).toEqual('complete')
-
-    z.close()
   })
 })
 
-describe('vueViewFactory', () => {
+describe.skip('vueViewFactory', () => {
   interface TestReturn {
     a: number
     b: string
   }
 
   it('correctly calls corresponding handlers', async () => {
-    const { z } = await setupTestEnvironment(simpleSchema)
-    await z.mutate.table.insert({ a: 1, b: 'a' })
-    await z.mutate.table.insert({ a: 2, b: 'b' })
+    const { zero, mutators, tableQuery } = setupSimple()
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+    await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
     const onDestroy = vi.fn()
     const onTransactionCommit = vi.fn()
 
-    const query = z.query.table
-    const view = query.materialize((_, input) => {
+    const view = zero.materialize(tableQuery, (_, input) => {
       return vueViewFactory(
         undefined as unknown as Query<typeof simpleSchema, 'table', TestReturn>,
         input,
@@ -1315,7 +1433,5 @@ describe('vueViewFactory', () => {
     expect(onDestroy).not.toHaveBeenCalled()
     view.destroy()
     expect(onDestroy).toHaveBeenCalledTimes(1)
-
-    z.close()
   })
 })

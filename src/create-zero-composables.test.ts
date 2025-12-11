@@ -69,15 +69,15 @@ describe('createZeroComposables', () => {
   })
 
   it('useQuery works whithout explicitly calling useZero', async () => {
-    const z = new Zero({
+    const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema: testSchema,
       kvStore: 'mem' as const,
     })
 
-    await z.mutate.test.insert({ id: 1, name: 'test1' })
-    await z.mutate.test.insert({ id: 2, name: 'test2' })
+    await zero.mutate.test.insert({ id: 1, name: 'test1' })
+    await zero.mutate.test.insert({ id: 2, name: 'test2' })
 
     const builder = createBuilder(testSchema)
     const byIdQuery = syncedQuery(
@@ -94,7 +94,7 @@ describe('createZeroComposables', () => {
     )
 
     const { useQuery } = createZeroComposables({
-      zero: z,
+      zero,
     })
 
     const { data } = useQuery(() => byIdQuery(1))
@@ -135,7 +135,7 @@ describe('createZeroComposables', () => {
   })
 
   it('is created lazily and once', async () => {
-    const z = new Zero({
+    const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema: testSchema,
@@ -146,7 +146,7 @@ describe('createZeroComposables', () => {
     const accessCountPerCreation = 2
 
     const proxiedOpts = new Proxy(
-      { zero: z },
+      { zero },
       {
         get(target, prop) {
           if (prop === 'zero') {

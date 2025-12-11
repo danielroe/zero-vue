@@ -23,13 +23,13 @@ describe('zero-vue', () => {
       // the schema. Switch to 'idb' for local-persistence.
       kvStore: 'mem',
     }))
-    const z = useZero()
+    const zero = useZero()
 
-    const { data: users } = useQuery(z.value.query.user)
+    const { data: users } = useQuery(zero.value.query.user)
 
     expect(users.value).toEqual([])
 
-    const mutation = z.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
+    const mutation = zero.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
 
     expect(users.value).toEqual([])
 
