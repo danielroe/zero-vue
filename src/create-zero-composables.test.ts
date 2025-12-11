@@ -3,8 +3,8 @@ import {
   createCRUDBuilder,
   createSchema,
   defineMutator,
-  defineMutators,
-  defineQueries,
+  defineMutatorsWithType,
+  defineQueriesWithType,
   defineQuery,
   number,
   string,
@@ -85,6 +85,7 @@ describe('createZeroComposables', () => {
 
   it('useQuery works whithout explicitly calling useZero', async () => {
     const crud = createCRUDBuilder(testSchema)
+    const defineMutators = defineMutatorsWithType<typeof testSchema>()
     const mutators = defineMutators({
       test: {
         insert: defineMutator(
@@ -108,6 +109,7 @@ describe('createZeroComposables', () => {
     await zero.mutate(mutators.test.insert({ id: 2, name: 'test2' })).client
 
     const zql = createBuilder(testSchema)
+    const defineQueries = defineQueriesWithType<typeof testSchema>()
     const queries = defineQueries({
       byId: defineQuery(
         z.number(),

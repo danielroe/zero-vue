@@ -1,4 +1,14 @@
-import { createBuilder, createCRUDBuilder, createSchema, defineMutator, defineMutators, defineQueries, defineQuery, string, table } from '@rocicorp/zero'
+import {
+  createBuilder,
+  createCRUDBuilder,
+  createSchema,
+  defineMutator,
+  defineMutatorsWithType,
+  defineQueriesWithType,
+  defineQuery,
+  string,
+  table,
+} from '@rocicorp/zero'
 import { describe, expect, it } from 'vitest'
 import z from 'zod'
 import { createZeroComposables } from '../src'
@@ -14,15 +24,10 @@ const schema = createSchema({
   tables: [user],
 })
 
-declare module '@rocicorp/zero' {
-  interface DefaultTypes {
-    schema: typeof schema
-  }
-}
-
 describe('zero-vue', () => {
   it('works', async () => {
     const crud = createCRUDBuilder(schema)
+    const defineMutators = defineMutatorsWithType<typeof schema>()
     const mutators = defineMutators({
       insert: defineMutator(
         z.object({ id: z.string(), name: z.string() }),
@@ -44,11 +49,12 @@ describe('zero-vue', () => {
     const zero = useZero()
 
     const zql = createBuilder(schema)
+    const defineQueries = defineQueriesWithType<typeof schema>()
     const queries = defineQueries({
       user: defineQuery(() => zql.user),
     })
 
-    const { data: users } = useQuery(queries.user)
+    const { data: users } = useQuery(queries.user())
 
     expect(users.value).toEqual([])
 

@@ -6,8 +6,8 @@ import {
   createCRUDBuilder,
   createSchema,
   defineMutator,
-  defineMutators,
-  defineQueries,
+  defineMutatorsWithType,
+  defineQueriesWithType,
   defineQuery,
   number,
   relationships,
@@ -21,13 +21,6 @@ import z from 'zod'
 import { addContextToQuery } from './query'
 import { VueView, vueViewFactory } from './view'
 
-type AllSchemas = typeof simpleSchema & typeof collapseSchema & typeof treeSchema
-declare module '@rocicorp/zero' {
-  interface DefaultTypes {
-    schema: AllSchemas
-  }
-}
-
 const simpleSchema = createSchema({
   tables: [
     table('table')
@@ -40,7 +33,8 @@ const simpleSchema = createSchema({
 })
 
 function setupSimple() {
-  const crud = createCRUDBuilder<AllSchemas>(simpleSchema)
+  const crud = createCRUDBuilder(simpleSchema)
+  const defineMutators = defineMutatorsWithType<typeof simpleSchema>()
   const mutators = defineMutators({
     insert: defineMutator(
       z.object({ a: z.number(), b: z.string() }),
@@ -73,6 +67,7 @@ function setupSimple() {
   })
 
   const zql = createBuilder(simpleSchema)
+  const defineQueries = defineQueriesWithType<typeof simpleSchema>()
   const queries = defineQueries({
     table: defineQuery(() => zql.table),
   })
@@ -105,7 +100,8 @@ const treeSchema = createSchema({
 })
 
 function setupTree() {
-  const crud = createCRUDBuilder<AllSchemas>(treeSchema)
+  const crud = createCRUDBuilder(treeSchema)
+  const defineMutators = defineMutatorsWithType<typeof treeSchema>()
   const mutators = defineMutators({
     insert: defineMutator(
       z.object({ id: z.number(), name: z.string(), data: z.string().optional().nullable(), childID: z.number().nullable() }),
@@ -146,6 +142,7 @@ function setupTree() {
   })
 
   const zql = createBuilder(treeSchema)
+  const defineQueries = defineQueriesWithType<typeof treeSchema>()
   const queries = defineQueries({
     table: defineQuery(() => zql.tree.related('children')),
     one: defineQuery(() => zql.tree.related('children').one()),
@@ -211,6 +208,7 @@ function setupCollapse() {
   })
 
   const zql = createBuilder(collapseSchema)
+  const defineQueries = defineQueriesWithType<typeof collapseSchema>()
   const queries = defineQueries({
     issuesWithLabelsQuery: defineQuery(() => zql.issue.related('labels')),
   })
@@ -224,9 +222,7 @@ describe('vueView', () => {
   it('basics', async () => {
     const { zero, mutators, tableQuery } = setupSimple()
 
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
     const view = zero.materialize(
@@ -252,7 +248,6 @@ describe('vueView', () => {
     // TODO: Test with a real resolver
     // expect(view.status).toEqual("complete");
 
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.insert({ a: 3, b: 'c' })).client
 
     expect(view.data).toMatchInlineSnapshot(`
@@ -275,9 +270,7 @@ describe('vueView', () => {
     ]
   `)
 
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.delete({ a: 1 })).client
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.delete({ a: 2 })).client
 
     expect(view.data).toMatchInlineSnapshot(`
@@ -290,7 +283,6 @@ describe('vueView', () => {
     ]
   `)
 
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
     await zero.mutate(mutators.delete({ a: 3 })).client
 
     expect(view.data).toEqual([])
@@ -305,7 +297,6 @@ describe('vueView', () => {
     expect(view.data?.length).toBe(0)
 
     for (const i in [...Array.from({ length: iterations }).keys()]) {
-    // @ts-expect-error - We can't augment the zero instance with the schema, because we're using multiple schemas
       await zero.mutate(mutators.insert({ a: Number(i), b: 'a' })).client
     }
 

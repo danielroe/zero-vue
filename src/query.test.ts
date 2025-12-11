@@ -1,5 +1,17 @@
 import type { TTL } from '@rocicorp/zero'
-import { createBuilder, createCRUDBuilder, createSchema, defineMutator, defineMutators, defineQueries, defineQuery, number, string, table, Zero } from '@rocicorp/zero'
+import {
+  createBuilder,
+  createCRUDBuilder,
+  createSchema,
+  defineMutator,
+  defineMutatorsWithType,
+  defineQueriesWithType,
+  defineQuery,
+  number,
+  string,
+  table,
+  Zero,
+} from '@rocicorp/zero'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { nextTick, ref, watchEffect } from 'vue'
 import z from 'zod'
@@ -22,6 +34,7 @@ async function setupTestEnvironment() {
   const userID = ref('asdf')
 
   const crud = createCRUDBuilder(schema)
+  const defineMutators = defineMutatorsWithType<typeof schema>()
   const mutators = defineMutators({
     table: {
       insert: defineMutator(
@@ -52,6 +65,7 @@ async function setupTestEnvironment() {
   await zero.value.mutate(mutators.table.insert({ a: 2, b: 'b' })).client
 
   const zql = createBuilder(schema)
+  const defineQueries = defineQueriesWithType<typeof schema>()
   const queries = defineQueries({
     byId: defineQuery(
       z.number(),
@@ -274,6 +288,7 @@ describe('useQuery', () => {
 
   it('can still be used without createZero', async () => {
     const crud = createCRUDBuilder(schema)
+    const defineMutators = defineMutatorsWithType<typeof schema>()
     const mutators = defineMutators({
       table: {
         insert: defineMutator(
@@ -295,6 +310,7 @@ describe('useQuery', () => {
     await zero.mutate(mutators.table.insert({ a: 2, b: 'b' })).client
 
     const zql = createBuilder(schema)
+    const defineQueries = defineQueriesWithType<typeof schema>()
     const queries = defineQueries({
       table: defineQuery(
         () => zql.table,
