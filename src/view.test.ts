@@ -1,4 +1,4 @@
-import type { Query, QueryOrQueryRequest, ReadonlyJSONValue, Schema } from '@rocicorp/zero'
+import type { Query } from '@rocicorp/zero'
 
 import { resolver } from '@rocicorp/resolver'
 import {
@@ -18,6 +18,7 @@ import {
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import z from 'zod'
+import { addContextToQuery } from './query'
 import { VueView, vueViewFactory } from './view'
 
 type AllSchemas = typeof simpleSchema & typeof collapseSchema & typeof treeSchema
@@ -217,24 +218,6 @@ function setupCollapse() {
   const issuesWithLabelsQuery = addContextToQuery(queries.issuesWithLabelsQuery(), zero.context)
 
   return { zero, queries, issuesWithLabelsQuery }
-}
-
-export function addContextToQuery<
-  TTable extends keyof TSchema['tables'] & string,
-  TInput extends ReadonlyJSONValue | undefined,
-  TOutput extends ReadonlyJSONValue | undefined,
-  TSchema extends Schema,
-  TReturn,
-  TContext,
->(query: QueryOrQueryRequest<
-  TTable,
-  TInput,
-  TOutput,
-  TSchema,
-  TReturn,
-  TContext
->, context: TContext): Query<TTable, TSchema, TReturn> {
-  return 'query' in query ? query.query.fn({ ctx: context, args: query.args }) : query
 }
 
 describe('vueView', () => {

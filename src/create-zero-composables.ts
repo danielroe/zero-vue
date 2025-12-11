@@ -1,4 +1,4 @@
-import type { CustomMutatorDefs, Query, Schema, ZeroOptions } from '@rocicorp/zero'
+import type { CustomMutatorDefs, DefaultContext, DefaultSchema, PullRow, QueryOrQueryRequest, ReadonlyJSONValue, Schema, ZeroOptions } from '@rocicorp/zero'
 import type { MaybeRefOrGetter, ShallowRef } from 'vue'
 import type { QueryResult, UseQueryOptions } from './query'
 import { Zero } from '@rocicorp/zero'
@@ -6,16 +6,17 @@ import { shallowRef, toValue, watch } from 'vue'
 import { useQuery as _useQuery } from './query'
 
 export function createZeroComposables<
-  S extends Schema = Schema,
+  TSchema extends Schema = DefaultSchema,
   MD extends CustomMutatorDefs | undefined = undefined,
+  TContext = DefaultContext,
 >(
-  optsOrZero: MaybeRefOrGetter<ZeroOptions<S, MD> | { zero: Zero<S, MD> }>,
+  optsOrZero: MaybeRefOrGetter<ZeroOptions<TSchema, MD, TContext> | { zero: Zero<TSchema, MD, TContext> }>,
 ) {
-  let z: ShallowRef<Zero<S, MD>>
+  let z: ShallowRef<Zero<TSchema, MD, TContext>>
 
-  function useZero(): ShallowRef<Zero<S, MD>> {
+  function useZero(): ShallowRef<Zero<TSchema, MD, TContext>> {
     if (!z) {
-      z = shallowRef() as ShallowRef<Zero<S, MD>>
+      z = shallowRef() as ShallowRef<Zero<TSchema, MD, TContext>>
     }
 
     if (z.value) {
@@ -34,10 +35,12 @@ export function createZeroComposables<
   }
 
   function useQuery<
-    TTable extends keyof S['tables'] & string,
-    TReturn,
+    TTable extends keyof TSchema['tables'] & string,
+    TInput extends ReadonlyJSONValue | undefined,
+    TOutput extends ReadonlyJSONValue | undefined,
+    TReturn = PullRow<TTable, TSchema>,
   >(
-    query: MaybeRefOrGetter<Query<S, TTable, TReturn>>,
+    query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext>>,
     options?: MaybeRefOrGetter<UseQueryOptions>,
   ): QueryResult<TReturn> {
     const zero = useZero()

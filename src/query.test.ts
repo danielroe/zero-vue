@@ -1,7 +1,8 @@
 import type { TTL } from '@rocicorp/zero'
-import { createBuilder, createSchema, number, string, syncedQuery, table, Zero } from '@rocicorp/zero'
+import { createBuilder, createCRUDBuilder, createSchema, defineMutator, defineMutators, defineQueries, defineQuery, number, string, table, Zero } from '@rocicorp/zero'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { nextTick, ref, watchEffect } from 'vue'
+import z from 'zod'
 import { createZeroComposables } from './create-zero-composables'
 import { useQuery } from './query'
 import { VueView, vueViewFactory } from './view'
@@ -20,44 +21,58 @@ const schema = createSchema({
 async function setupTestEnvironment() {
   const userID = ref('asdf')
 
+  const crud = createCRUDBuilder(schema)
+  const mutators = defineMutators({
+    table: {
+      insert: defineMutator(
+        z.object({ a: z.number(), b: z.string() }),
+        async ({ tx, args: { a, b } }) => {
+          return tx.mutate(crud.table.insert({ a, b }))
+        },
+      ),
+      update: defineMutator(
+        z.object({ a: z.number(), b: z.string() }),
+        async ({ tx, args: { a, b } }) => {
+          return tx.mutate(crud.table.update({ a, b }))
+        },
+      ),
+    },
+  })
+
   const { useZero, useQuery } = createZeroComposables(() => ({
     userID: userID.value,
     server: null,
     schema,
+    mutators,
     kvStore: 'mem',
   }))
 
   const zero = useZero()
-  await zero.value.mutate.table.insert({ a: 1, b: 'a' })
-  await zero.value.mutate.table.insert({ a: 2, b: 'b' })
+  await zero.value.mutate(mutators.table.insert({ a: 1, b: 'a' })).client
+  await zero.value.mutate(mutators.table.insert({ a: 2, b: 'b' })).client
 
-  const builder = createBuilder(schema)
-  const byIdQuery = syncedQuery(
-    'byId',
-    ([id]) => {
-      if (typeof id !== 'number') {
-        throw new TypeError('id must be a number')
-      }
-      return [id] as const
-    },
-    (id: number) => {
-      return builder.table.where('a', id)
-    },
-  )
-
-  const tableQuery = zero!.value.query.table
-
-  onTestFinished(() => {
-    zero.value.close()
+  const zql = createBuilder(schema)
+  const queries = defineQueries({
+    byId: defineQuery(
+      z.number(),
+      ({ args: a }) => zql.table.where('a', a),
+    ),
+    table: defineQuery(
+      () => zql.table,
+    ),
   })
 
-  return { z: zero, tableQuery, useQuery, byIdQuery, userID }
+  onTestFinished(async () => {
+    await zero.value.close()
+  })
+
+  return { zero, queries, useQuery, mutators, userID }
 }
 
 describe('useQuery', () => {
   it('useQuery', async () => {
-    const { z, tableQuery, useQuery } = await setupTestEnvironment()
-    const { data: rows, status } = useQuery(() => tableQuery)
+    const { zero, mutators, queries, useQuery } = await setupTestEnvironment()
+    const { data: rows, status } = useQuery(() => queries.table())
     expect(rows.value).toMatchInlineSnapshot(`[
   {
     "a": 1,
@@ -72,7 +87,7 @@ describe('useQuery', () => {
 ]`)
     expect(status.value).toEqual('unknown')
 
-    await z.value.mutate.table.insert({ a: 3, b: 'c' })
+    await zero.value.mutate(mutators.table.insert({ a: 3, b: 'c' })).client
     await nextTick()
 
     expect(rows.value).toMatchInlineSnapshot(`[
@@ -98,24 +113,45 @@ describe('useQuery', () => {
   })
 
   it('useQuery with ttl', async () => {
-    const { z, tableQuery, useQuery } = await setupTestEnvironment()
+    const { zero, queries, useQuery } = await setupTestEnvironment()
 
     const ttl = ref<TTL>('1m')
 
-    const materializeSpy = vi.spyOn(z.value, 'materialize')
-    const queryGetter = vi.fn(() => tableQuery)
+    const materializeSpy = vi.spyOn(zero.value, 'materialize')
+    const queryGetter = vi.fn(() => queries.table())
 
     useQuery(queryGetter, () => ({ ttl: ttl.value }))
     expect(queryGetter).toHaveBeenCalledTimes(1)
 
     expect(materializeSpy).toHaveLastReturnedWith(expect.any(VueView))
     expect(materializeSpy).toHaveBeenCalledExactlyOnceWith(
-      tableQuery,
+      expect.any(Object),
       vueViewFactory,
       { ttl: '1m' },
     )
+    expect(materializeSpy.mock.calls[0]![0]).toMatchInlineSnapshot(`
+      QueryImpl {
+        "_exists": [Function],
+        "customQueryID": {
+          "args": [],
+          "name": "table",
+        },
+        "format": {
+          "relationships": {},
+          "singular": false,
+        },
+        "limit": [Function],
+        "one": [Function],
+        "orderBy": [Function],
+        "related": [Function],
+        "start": [Function],
+        "where": [Function],
+        "whereExists": [Function],
+        Symbol(): true,
+      }
+    `)
 
-    const view: VueView<unknown> = materializeSpy.mock.results[0]!.value
+    const view: VueView = materializeSpy.mock.results[0]!.value
     const updateTTLSpy = vi.spyOn(view, 'updateTTL')
 
     materializeSpy.mockClear()
@@ -128,12 +164,12 @@ describe('useQuery', () => {
   })
 
   it('useQuery deps change', async () => {
-    const { tableQuery, useQuery } = await setupTestEnvironment()
+    const { queries, useQuery } = await setupTestEnvironment()
 
     const a = ref(1)
 
     const { data: rows, status } = useQuery(() =>
-      tableQuery.where('a', a.value),
+      queries.byId(a.value),
     )
 
     const rowLog: unknown[] = []
@@ -187,9 +223,9 @@ describe('useQuery', () => {
   })
 
   it('useQuery deps change watchEffect', async () => {
-    const { z, tableQuery, useQuery } = await setupTestEnvironment()
+    const { zero, queries, mutators, useQuery } = await setupTestEnvironment()
     const a = ref(1)
-    const { data: rows } = useQuery(() => tableQuery.where('a', a.value))
+    const { data: rows } = useQuery(() => queries.byId(a.value))
 
     let run = 0
 
@@ -205,7 +241,7 @@ describe('useQuery', () => {
   },
 ]`,
           )
-          z.value.mutate.table.update({ a: 1, b: 'a2' })
+          zero.value.mutate(mutators.table.update({ a: 1, b: 'a2' }))
         }
         else if (run === 1) {
           expect(rows.value).toMatchInlineSnapshot(
@@ -236,37 +272,36 @@ describe('useQuery', () => {
     })
   })
 
-  it('useQuery with syncedQuery', async () => {
-    const { byIdQuery, useQuery } = await setupTestEnvironment()
-    if (!byIdQuery) {
-      return
-    }
-
-    const a = ref(1)
-    const { data: rows, status } = useQuery(() => byIdQuery(a.value))
-
-    expect(rows.value).toMatchInlineSnapshot(`
-[
-  {
-    "a": 1,
-    "b": "a",
-    Symbol(rc): 1,
-  },
-]`)
-    expect(status.value).toEqual('unknown')
-  })
-
   it('can still be used without createZero', async () => {
+    const crud = createCRUDBuilder(schema)
+    const mutators = defineMutators({
+      table: {
+        insert: defineMutator(
+          z.object({ a: z.number(), b: z.string() }),
+          async ({ tx, args: { a, b } }) => {
+            return tx.mutate(crud.table.insert({ a, b }))
+          },
+        ),
+      },
+    })
     const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema,
+      mutators,
       kvStore: 'mem' as const,
     })
-    await zero.mutate.table.insert({ a: 1, b: 'a' })
-    await zero.mutate.table.insert({ a: 2, b: 'b' })
+    await zero.mutate(mutators.table.insert({ a: 1, b: 'a' })).client
+    await zero.mutate(mutators.table.insert({ a: 2, b: 'b' })).client
 
-    const { data: rows, status } = useQuery(zero, () => zero.query.table)
+    const zql = createBuilder(schema)
+    const queries = defineQueries({
+      table: defineQuery(
+        () => zql.table,
+      ),
+    })
+
+    const { data: rows, status } = useQuery(zero, () => queries.table())
     expect(rows.value).toMatchInlineSnapshot(`[
   {
     "a": 1,
@@ -281,6 +316,6 @@ describe('useQuery', () => {
 ]`)
     expect(status.value).toEqual('unknown')
 
-    zero.close()
+    await zero.close()
   })
 })

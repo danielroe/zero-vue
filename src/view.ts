@@ -5,7 +5,6 @@ import type {
   Change,
   Entry,
   Format,
-  HumanReadable,
   Input,
   Node,
   Output,
