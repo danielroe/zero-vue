@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { escapeLike } from '@rocicorp/zero'
 import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { SignJWT } from 'jose'
@@ -8,35 +7,23 @@ import { useInterval } from '~/composables/use-interval'
 import { randomMessage } from '~/db/data/test-data'
 import { formatDate } from '~/utils/date'
 import { randInt } from '~/utils/rand'
-import { useQuery, useZero } from './zero'
+import { mutators, queries, useQuery, useZero } from './zero'
 
 const cookies = useCookies()
 
 const zero = useZero()
-const { data: users } = useQuery(() => zero.value.query.user)
-const { data: mediums } = useQuery(() => zero.value.query.medium)
-const { data: allMessages } = useQuery(() => zero.value.query.message)
+const { data: users } = useQuery(() => queries.users.all())
+const { data: mediums } = useQuery(() => queries.mediums.all())
+const { data: allMessages } = useQuery(() => queries.messages.all())
 
 const filterUser = ref('')
 const filterText = ref('')
 const action = ref<'add' | 'remove' | undefined>(undefined)
 
-const { data: filteredMessages } = useQuery(() => {
-  let filtered = zero.value.query.message
-    .related('medium', medium => medium.one())
-    .related('sender', sender => sender.one())
-    .orderBy('timestamp', 'desc')
-
-  if (filterUser.value) {
-    filtered = filtered.where('senderID', filterUser.value)
-  }
-
-  if (filterText.value) {
-    filtered = filtered.where('body', 'LIKE', `%${escapeLike(filterText.value)}%`)
-  }
-
-  return filtered
-})
+const { data: filteredMessages } = useQuery(() => queries.messages.filtered({
+  filterUser: filterUser.value,
+  filterText: filterText.value,
+}))
 
 const hasFilters = computed(() => filterUser.value || filterText.value)
 
@@ -45,13 +32,15 @@ function deleteRandomMessage() {
     return false
   }
   const index = randInt(allMessages.value.length)
-  zero.value.mutate.message.delete({ id: allMessages.value[index]!.id })
+  zero.value.mutate(mutators.message.delete({ id: allMessages.value[index]!.id }))
 
   return true
 }
 
 function addRandomMessage() {
-  zero.value.mutate.message.insert(randomMessage(users.value, mediums.value))
+  zero.value.mutate(mutators.message.insert(
+    randomMessage(users.value, mediums.value),
+  ))
   return true
 }
 
@@ -117,10 +106,10 @@ function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) 
 
   // eslint-disable-next-line no-alert
   const body = prompt('Edit message', prev)
-  zero.value.mutate.message.update({
+  zero.value.mutate(mutators.message.update({
     id,
     body: body ?? prev,
-  })
+  }))
 }
 
 async function toggleLogin() {
