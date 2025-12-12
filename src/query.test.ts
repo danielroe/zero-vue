@@ -145,7 +145,6 @@ describe('useQuery', () => {
     )
     expect(materializeSpy.mock.calls[0]![0]).toMatchInlineSnapshot(`
       QueryImpl {
-        "_exists": [Function],
         "customQueryID": {
           "args": [],
           "name": "table",
@@ -331,7 +330,5 @@ describe('useQuery', () => {
   },
 ]`)
     expect(status.value).toEqual('unknown')
-
-    await zero.close()
   })
 })

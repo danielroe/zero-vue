@@ -15,7 +15,7 @@ import type {
   TTL,
 } from '@rocicorp/zero'
 import type { Ref } from 'vue'
-import { applyChange } from '@rocicorp/zero'
+import { applyChange } from '@rocicorp/zero/bindings'
 import { ref } from 'vue'
 
 // zero does not export this type
