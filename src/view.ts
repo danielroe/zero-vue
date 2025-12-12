@@ -4,55 +4,22 @@ import type {
   AnyViewFactory,
   Change,
   Entry,
+  ErroredQuery,
   Format,
   Input,
-  Node,
   Output,
   Query,
-  ReadonlyJSONValue,
+  QueryErrorDetails,
+  QueryResultDetails,
   Schema,
-  Stream,
   TTL,
 } from '@rocicorp/zero'
 import type { Ref } from 'vue'
-import { applyChange } from '@rocicorp/zero/bindings'
+import { applyChange, skipYields } from '@rocicorp/zero/bindings'
 import { ref } from 'vue'
 
-// zero does not export this type
-type ErroredQuery = {
-  error: 'app'
-  id: string
-  name: string
-  message?: string
-  details?: ReadonlyJSONValue
-} | {
-  error: 'parse'
-  id: string
-  name: string
-  message: string
-  details?: ReadonlyJSONValue
-}
-
-export type QueryStatus = 'complete' | 'unknown' | 'error'
-
-export type QueryError = {
-  readonly type: 'app'
-  readonly message: string
-  readonly details?: ReadonlyJSONValue
-}
-| {
-  readonly type: 'parse'
-  readonly message: string
-  readonly details?: ReadonlyJSONValue
-}
-
-function* skipYields(stream: Stream<Node | 'yield'>): Stream<Node> {
-  for (const node of stream) {
-    if (node !== 'yield') {
-      yield node
-    }
-  }
-}
+export type QueryStatus = QueryResultDetails['type']
+export type QueryError = QueryErrorDetails['error']
 
 export class VueView implements Output {
   readonly #input: Input

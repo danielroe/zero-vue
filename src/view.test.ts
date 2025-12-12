@@ -15,10 +15,10 @@ import {
   table,
   Zero,
 } from '@rocicorp/zero'
+import { addContextToQuery } from '@rocicorp/zero/bindings'
 import { assert, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import z from 'zod'
-import { addContextToQuery } from './query'
 import { VueView, vueViewFactory } from './view'
 
 const simpleSchema = createSchema({

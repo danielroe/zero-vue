@@ -6,7 +6,6 @@ import type {
   DefaultSchema,
   HumanReadable,
   PullRow,
-  Query,
   QueryOrQueryRequest,
   ReadonlyJSONValue,
   Schema,
@@ -16,6 +15,7 @@ import type {
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { QueryError, QueryStatus, VueView } from './view'
 
+import { addContextToQuery } from '@rocicorp/zero/bindings'
 import {
   computed,
   getCurrentInstance,
@@ -36,24 +36,6 @@ export interface QueryResult<TReturn> {
   data: ComputedRef<HumanReadable<TReturn>>
   status: ComputedRef<QueryStatus>
   error: ComputedRef<QueryError & { retry: () => void } | undefined>
-}
-
-export function addContextToQuery<
-  TTable extends keyof TSchema['tables'] & string,
-  TInput extends ReadonlyJSONValue | undefined,
-  TOutput extends ReadonlyJSONValue | undefined,
-  TSchema extends Schema,
-  TReturn,
-  TContext,
->(query: QueryOrQueryRequest<
-  TTable,
-  TInput,
-  TOutput,
-  TSchema,
-  TReturn,
-  TContext
->, context: TContext): Query<TTable, TSchema, TReturn> {
-  return 'query' in query ? query.query.fn({ ctx: context, args: query.args }) : query
 }
 
 export function useQuery<

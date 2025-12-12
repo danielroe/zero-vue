@@ -5,7 +5,7 @@
 // See https://github.com/rocicorp/mono/blob/main/apps/zbugs/src/domain/schema.ts
 // for more complex examples, including many-to-many.
 
-import type { PermissionsConfig, Row } from '@rocicorp/zero'
+import type { Row } from '@rocicorp/zero'
 import {
   boolean,
   createBuilder,
