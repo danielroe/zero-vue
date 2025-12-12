@@ -11,7 +11,6 @@ import {
   createBuilder,
   createCRUDBuilder,
   createSchema,
-  definePermissions,
   number,
   relationships,
   string,
@@ -76,5 +75,3 @@ declare module '@rocicorp/zero' {
 
 export const zql = createBuilder(schema)
 export const crud = createCRUDBuilder(schema)
-
-export const permissions = definePermissions(schema, () => ({}))
