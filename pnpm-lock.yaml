@@ -12,7 +12,7 @@ importers:
   .:
     dependencies:
       '@rocicorp/zero':
-        specifier: 0.25.1
+        specifier: ^0.25.1
         version: 0.25.1(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))
     devDependencies:
       '@antfu/eslint-config':
@@ -64,7 +64,7 @@ importers:
   playground:
     dependencies:
       '@rocicorp/zero':
-        specifier: 0.25.1
+        specifier: ^0.25.1
         version: 0.25.1(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))
       '@vueuse/integrations':
         specifier: ^14.0.0
