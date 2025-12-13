@@ -7,18 +7,20 @@
     "build": "vite build",
     "preview": "vite preview",
     "dev:ui": "vite dev",
-    "dev:zero-cache": "zero-cache-dev -p src/db/schema.ts",
+    "dev:zero-cache": "zero-cache-dev",
     "dev:db-up": "docker compose --env-file .env -f ./docker/docker-compose.yml up",
     "dev:db-down": "docker compose --env-file .env -f ./docker/docker-compose.yml down",
     "dev:clean": "source .env && docker volume rm -f docker_zstart_pgdata && rm -rf \"${ZERO_REPLICA_FILE}\"*",
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
+    "@rocicorp/zero": "^0.25.1",
     "@vueuse/integrations": "^14.0.0",
     "jose": "^6.0.0",
     "universal-cookie": "^8.0.0",
     "vue": "^3.5.13",
-    "zero-vue": "latest"
+    "zero-vue": "latest",
+    "zod": "4.1.13"
   },
   "devDependencies": {
     "@tsconfig/node22": "22.0.5",

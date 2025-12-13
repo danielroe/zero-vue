@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { escapeLike } from '@rocicorp/zero'
 import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { SignJWT } from 'jose'
@@ -8,35 +7,23 @@ import { useInterval } from '~/composables/use-interval'
 import { randomMessage } from '~/db/data/test-data'
 import { formatDate } from '~/utils/date'
 import { randInt } from '~/utils/rand'
-import { useQuery, useZero } from './zero'
+import { mutators, queries, useQuery, useZero } from './zero'
 
 const cookies = useCookies()
 
-const z = useZero()
-const { data: users } = useQuery(() => z.value.query.user)
-const { data: mediums } = useQuery(() => z.value.query.medium)
-const { data: allMessages } = useQuery(() => z.value.query.message)
+const zero = useZero()
+const { data: users } = useQuery(() => queries.users.all())
+const { data: mediums } = useQuery(() => queries.mediums.all())
+const { data: allMessages } = useQuery(() => queries.messages.all())
 
 const filterUser = ref('')
 const filterText = ref('')
 const action = ref<'add' | 'remove' | undefined>(undefined)
 
-const { data: filteredMessages } = useQuery(() => {
-  let filtered = z.value.query.message
-    .related('medium', medium => medium.one())
-    .related('sender', sender => sender.one())
-    .orderBy('timestamp', 'desc')
-
-  if (filterUser.value) {
-    filtered = filtered.where('senderID', filterUser.value)
-  }
-
-  if (filterText.value) {
-    filtered = filtered.where('body', 'LIKE', `%${escapeLike(filterText.value)}%`)
-  }
-
-  return filtered
-})
+const { data: filteredMessages } = useQuery(() => queries.messages.filtered({
+  filterUser: filterUser.value,
+  filterText: filterText.value,
+}))
 
 const hasFilters = computed(() => filterUser.value || filterText.value)
 
@@ -45,13 +32,15 @@ function deleteRandomMessage() {
     return false
   }
   const index = randInt(allMessages.value.length)
-  z.value.mutate.message.delete({ id: allMessages.value[index]!.id })
+  zero.value.mutate(mutators.message.delete({ id: allMessages.value[index]!.id }))
 
   return true
 }
 
 function addRandomMessage() {
-  z.value.mutate.message.insert(randomMessage(users.value, mediums.value))
+  zero.value.mutate(mutators.message.insert(
+    randomMessage(users.value, mediums.value),
+  ))
   return true
 }
 
@@ -85,7 +74,7 @@ function handleAddAction() {
 }
 
 function handleRemoveAction(e: MouseEvent | TouchEvent) {
-  if (z.value.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
+  if (zero.value.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
     // eslint-disable-next-line no-alert
     alert('You must be logged in to delete. Hold shift to try anyway.')
     return
@@ -107,7 +96,7 @@ function stopAction() {
 }
 
 function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) {
-  if (senderID !== z.value.userID && !e.shiftKey) {
+  if (senderID !== zero.value.userID && !e.shiftKey) {
     // eslint-disable-next-line no-alert
     alert(
       'You aren\'t logged in as the sender of this message. Editing won\'t be permitted. Hold the shift key to try anyway.',
@@ -117,14 +106,14 @@ function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) 
 
   // eslint-disable-next-line no-alert
   const body = prompt('Edit message', prev)
-  z.value.mutate.message.update({
+  zero.value.mutate(mutators.message.update({
     id,
     body: body ?? prev,
-  })
+  }))
 }
 
 async function toggleLogin() {
-  if (z.value.userID === 'anon') {
+  if (zero.value.userID === 'anon') {
     const jwt = await new SignJWT({ sub: 'ENzoNm7g4E' })
       .setProtectedHeader({ alg: 'HS256' })
       .sign(new TextEncoder().encode(import.meta.env.VITE_PUBLIC_AUTH_SECRET))
@@ -135,7 +124,7 @@ async function toggleLogin() {
   }
 }
 
-const user = computed(() => users.value.find(user => user.id === z.value.userID)?.name ?? 'anon')
+const user = computed(() => users.value.find(user => user.id === zero.value.userID)?.name ?? 'anon')
 </script>
 
 <template>

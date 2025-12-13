@@ -59,8 +59,8 @@ To query data:
 ```js
 import { useQuery, useZero } from './use-zero.ts'
 
-const z = useZero()
-const { data: users } = useQuery(() => z.value.query.user)
+const zero = useZero()
+const { data: users } = useQuery(() => zero.value.query.user)
 ```
 
 > [!TIP]

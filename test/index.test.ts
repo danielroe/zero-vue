@@ -1,39 +1,67 @@
-import { createSchema, string, table } from '@rocicorp/zero'
+import {
+  createBuilder,
+  createSchema,
+  defineMutatorsWithType,
+  defineMutatorWithType,
+  defineQueriesWithType,
+  defineQuery,
+  string,
+  table,
+} from '@rocicorp/zero'
 import { describe, expect, it } from 'vitest'
+import z from 'zod'
 import { createZeroComposables } from '../src'
+
+const user = table('user')
+  .columns({
+    id: string(),
+    name: string(),
+  })
+  .primaryKey('id')
+
+const schema = createSchema({
+  tables: [user],
+})
 
 describe('zero-vue', () => {
   it('works', async () => {
-    const user = table('user')
-      .columns({
-        id: string(),
-        name: string(),
-      })
-      .primaryKey('id')
-
-    const schema = createSchema({
-      tables: [user],
+    const defineMutators = defineMutatorsWithType<typeof schema>()
+    const defineMutator = defineMutatorWithType<typeof schema>()
+    const mutators = defineMutators({
+      insert: defineMutator(
+        z.object({ id: z.string(), name: z.string() }),
+        async ({ tx, args: { id, name } }) => {
+          return tx.mutate.user.insert({ id, name })
+        },
+      ),
     })
 
     const { useZero, useQuery } = createZeroComposables(() => ({
       userID: 'asdf',
       server: null,
       schema,
+      mutators,
       // This is often easier to develop with if you're frequently changing
       // the schema. Switch to 'idb' for local-persistence.
       kvStore: 'mem',
     }))
-    const z = useZero()
+    const zero = useZero()
 
-    const { data: users } = useQuery(z.value.query.user)
+    const zql = createBuilder(schema)
+    const defineQueries = defineQueriesWithType<typeof schema>()
+    const queries = defineQueries({
+      user: defineQuery(() => zql.user),
+    })
+
+    const { data: users } = useQuery(queries.user())
 
     expect(users.value).toEqual([])
 
-    const mutation = z.value.mutate.user.insert({ id: 'asdf', name: 'Alice' })
+    const mutation = zero.value.mutate(mutators.insert({ id: 'asdf', name: 'Alice' }))
 
     expect(users.value).toEqual([])
 
-    await mutation
+    await mutation.client
 
     expect(users.value).toMatchInlineSnapshot(`
         [

@@ -1,9 +1,21 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
-import type { CustomMutatorDefs, HumanReadable, Query, Schema, TTL, Zero } from '@rocicorp/zero'
+import type {
+  CustomMutatorDefs,
+  DefaultContext,
+  DefaultSchema,
+  HumanReadable,
+  PullRow,
+  QueryOrQueryRequest,
+  ReadonlyJSONValue,
+  Schema,
+  TTL,
+  Zero,
+} from '@rocicorp/zero'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { QueryError, QueryStatus, VueView } from './view'
 
+import { addContextToQuery } from '@rocicorp/zero/bindings'
 import {
   computed,
   getCurrentInstance,
@@ -27,22 +39,37 @@ export interface QueryResult<TReturn> {
 }
 
 export function useQuery<
-  TSchema extends Schema,
   TTable extends keyof TSchema['tables'] & string,
-  TReturn,
+  TInput extends ReadonlyJSONValue | undefined,
+  TOutput extends ReadonlyJSONValue | undefined,
+  TSchema extends Schema = DefaultSchema,
+  TReturn = PullRow<TTable, TSchema>,
+  TContext = DefaultContext,
   MD extends CustomMutatorDefs | undefined = undefined,
 >(
-  z: MaybeRefOrGetter<Zero<TSchema, MD>>,
-  query: MaybeRefOrGetter<Query<TSchema, TTable, TReturn>>,
+  z: MaybeRefOrGetter<Zero<TSchema, MD, TContext>>,
+  query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext>>,
   options?: MaybeRefOrGetter<UseQueryOptions>,
 ): QueryResult<TReturn> {
   const ttl = computed(() => toValue(options)?.ttl ?? DEFAULT_TTL_MS)
-  const view = shallowRef<VueView<HumanReadable<TReturn>> | null>(null)
+  const view = shallowRef<VueView | null>(null)
   const refetchKey = shallowRef(0)
 
+  const q = shallowRef()
   watch(
     [
       () => toValue(query),
+      () => toValue(z),
+    ],
+    ([query, z]) => {
+      q.value = addContextToQuery(toValue(query), toValue(z).context)
+    },
+    { immediate: true },
+  )
+
+  watch(
+    [
+      () => toValue(q),
       () => toValue(z),
       refetchKey,
     ],

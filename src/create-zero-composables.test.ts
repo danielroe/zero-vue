@@ -1,6 +1,18 @@
-import { createBuilder, createSchema, number, string, syncedQuery, table, Zero } from '@rocicorp/zero'
+import {
+  createBuilder,
+  createSchema,
+  defineMutatorsWithType,
+  defineMutatorWithType,
+  defineQueriesWithType,
+  defineQuery,
+  number,
+  string,
+  table,
+  Zero,
+} from '@rocicorp/zero'
 import { assert, describe, expect, it } from 'vitest'
 import { computed, nextTick, ref } from 'vue'
+import z from 'zod'
 import { createZeroComposables } from './create-zero-composables'
 
 const testSchema = createSchema({
@@ -62,6 +74,7 @@ describe('createZeroComposables', () => {
 
     userID.value = 'test-user-2'
     await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 1))
 
     expect(zero.value.userID).toEqual('test-user-2')
     expect(zero.value.closed).toBe(false)
@@ -69,35 +82,44 @@ describe('createZeroComposables', () => {
   })
 
   it('useQuery works whithout explicitly calling useZero', async () => {
-    const z = new Zero({
+    const defineMutators = defineMutatorsWithType<typeof testSchema>()
+    const defineMutator = defineMutatorWithType<typeof testSchema>()
+    const mutators = defineMutators({
+      test: {
+        insert: defineMutator(
+          z.object({ id: z.number(), name: z.string() }),
+          async ({ tx, args: { id, name } }) => {
+            return tx.mutate.test.insert({ id, name })
+          },
+        ),
+      },
+    })
+
+    const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema: testSchema,
+      mutators,
       kvStore: 'mem' as const,
     })
 
-    await z.mutate.test.insert({ id: 1, name: 'test1' })
-    await z.mutate.test.insert({ id: 2, name: 'test2' })
+    await zero.mutate(mutators.test.insert({ id: 1, name: 'test1' })).client
+    await zero.mutate(mutators.test.insert({ id: 2, name: 'test2' })).client
 
-    const builder = createBuilder(testSchema)
-    const byIdQuery = syncedQuery(
-      'byId',
-      ([id]) => {
-        if (typeof id !== 'number') {
-          throw new TypeError('id must be a number')
-        }
-        return [id] as const
-      },
-      (id: number) => {
-        return builder.test.where('id', id)
-      },
-    )
-
-    const { useQuery } = createZeroComposables({
-      zero: z,
+    const zql = createBuilder(testSchema)
+    const defineQueries = defineQueriesWithType<typeof testSchema>()
+    const queries = defineQueries({
+      byId: defineQuery(
+        z.number(),
+        ({ args: id }) => zql.test.where('id', id),
+      ),
     })
 
-    const { data } = useQuery(() => byIdQuery(1))
+    const { useQuery } = createZeroComposables({
+      zero,
+    })
+
+    const { data } = useQuery(() => queries.byId(1))
     expect(data.value).toMatchInlineSnapshot(`
 [
   {
@@ -128,6 +150,7 @@ describe('createZeroComposables', () => {
 
     userID.value = 'test-user-2'
     await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 1))
 
     expect(usedZero.value.userID).toEqual('test-user-2')
     expect(usedZero.value.closed).toBe(false)
@@ -135,7 +158,7 @@ describe('createZeroComposables', () => {
   })
 
   it('is created lazily and once', async () => {
-    const z = new Zero({
+    const zero = new Zero({
       userID: 'test-user',
       server: null,
       schema: testSchema,
@@ -146,7 +169,7 @@ describe('createZeroComposables', () => {
     const accessCountPerCreation = 2
 
     const proxiedOpts = new Proxy(
-      { zero: z },
+      { zero },
       {
         get(target, prop) {
           if (prop === 'zero') {
