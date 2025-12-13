@@ -10,7 +10,7 @@ import { decodeJwt } from 'jose'
 import { createZeroComposables } from 'zero-vue'
 import z from 'zod'
 
-import { crud, schema, zql } from '~/db/schema'
+import { schema, zql } from '~/db/schema'
 
 const cookies = useCookies()
 
@@ -34,13 +34,13 @@ export const mutators = defineMutators({
         timestamp: z.number(),
       }),
       async ({ tx, ctx, args: { mediumID, body, id, timestamp } }) => {
-        return tx.mutate(crud.message.insert({
+        return tx.mutate.message.insert({
           senderID: ctx.sub,
           mediumID,
           body,
           id,
           timestamp,
-        }))
+        })
       },
     ),
     update: defineMutator(
@@ -57,7 +57,7 @@ export const mutators = defineMutators({
           throw new Error(`You aren't allowed to edit this message`)
         }
 
-        return tx.mutate(crud.message.update({ id, body }))
+        return tx.mutate.message.update({ id, body })
       },
     ),
     delete: defineMutator(
@@ -67,7 +67,7 @@ export const mutators = defineMutators({
           throw new Error('You must be logged in to delete')
         }
 
-        return tx.mutate(crud.message.delete({ id }))
+        return tx.mutate.message.delete({ id })
       },
     ),
   },

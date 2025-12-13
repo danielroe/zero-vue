@@ -9,7 +9,6 @@ import type { Row } from '@rocicorp/zero'
 import {
   boolean,
   createBuilder,
-  createCRUDBuilder,
   createSchema,
   number,
   relationships,
@@ -74,4 +73,3 @@ declare module '@rocicorp/zero' {
 }
 
 export const zql = createBuilder(schema)
-export const crud = createCRUDBuilder(schema)
