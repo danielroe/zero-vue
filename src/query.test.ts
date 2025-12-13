@@ -330,4 +330,41 @@ describe('useQuery', () => {
 ]`)
     expect(status.value).toEqual('unknown')
   })
+
+  it('still works with legacy queries', async () => {
+    const schema = createSchema({
+      tables: [
+        table('table')
+          .columns({
+            a: number(),
+            b: string(),
+          })
+          .primaryKey('a'),
+      ],
+      enableLegacyQueries: true,
+      enableLegacyMutators: true,
+    })
+
+    const zero = new Zero({
+      userID: 'test-user',
+      server: null,
+      schema,
+      kvStore: 'mem' as const,
+    })
+
+    const { data } = useQuery(zero, zero.query.table)
+    expect(data.value).toEqual([])
+
+    await zero.mutate.table.insert({ a: 1, b: 'a2' })
+
+    expect(data.value).toMatchInlineSnapshot(`
+      [
+        {
+          "a": 1,
+          "b": "a2",
+          Symbol(rc): 1,
+        },
+      ]
+    `)
+  })
 })
