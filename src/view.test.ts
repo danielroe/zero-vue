@@ -3,10 +3,9 @@ import type { Query } from '@rocicorp/zero'
 import { resolver } from '@rocicorp/resolver'
 import {
   createBuilder,
-  createCRUDBuilder,
   createSchema,
-  defineMutator,
   defineMutatorsWithType,
+  defineMutatorWithType,
   defineQueriesWithType,
   defineQuery,
   number,
@@ -33,25 +32,25 @@ const simpleSchema = createSchema({
 })
 
 function setupSimple() {
-  const crud = createCRUDBuilder(simpleSchema)
   const defineMutators = defineMutatorsWithType<typeof simpleSchema>()
+  const defineMutator = defineMutatorWithType<typeof simpleSchema>()
   const mutators = defineMutators({
     insert: defineMutator(
       z.object({ a: z.number(), b: z.string() }),
       async ({ tx, args: { a, b } }) => {
-        return tx.mutate(crud.table.insert({ a, b }))
+        return tx.mutate.table.insert({ a, b })
       },
     ),
     update: defineMutator(
       z.object({ a: z.number(), b: z.string() }),
       async ({ tx, args: { a, b } }) => {
-        return tx.mutate(crud.table.update({ a, b }))
+        return tx.mutate.table.update({ a, b })
       },
     ),
     delete: defineMutator(
       z.object({ a: z.number() }),
       async ({ tx, args: { a } }) => {
-        return tx.mutate(crud.table.delete({ a }))
+        return tx.mutate.table.delete({ a })
       },
     ),
   })
@@ -100,33 +99,33 @@ const treeSchema = createSchema({
 })
 
 function setupTree() {
-  const crud = createCRUDBuilder(treeSchema)
   const defineMutators = defineMutatorsWithType<typeof treeSchema>()
+  const defineMutator = defineMutatorWithType<typeof treeSchema>()
   const mutators = defineMutators({
     insert: defineMutator(
       z.object({ id: z.number(), name: z.string(), data: z.string().optional().nullable(), childID: z.number().nullable() }),
       async ({ tx, args: { id, name, data, childID } }) => {
-        return tx.mutate(crud.tree.insert({
+        return tx.mutate.tree.insert({
           id,
           name,
           data,
           childID,
-        }))
+        })
       },
     ),
     update: defineMutator(
       z.object({ id: z.number(), data: z.string() }),
       async ({ tx, args: { id, data } }) => {
-        return tx.mutate(crud.tree.update({
+        return tx.mutate.tree.update({
           id,
           data,
-        }))
+        })
       },
     ),
     delete: defineMutator(
       z.object({ id: z.number() }),
       async ({ tx, args: { id } }) => {
-        return tx.mutate(crud.tree.delete({ id }))
+        return tx.mutate.tree.delete({ id })
       },
     ),
   })

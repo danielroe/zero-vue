@@ -1,9 +1,8 @@
 import {
   createBuilder,
-  createCRUDBuilder,
   createSchema,
-  defineMutator,
   defineMutatorsWithType,
+  defineMutatorWithType,
   defineQueriesWithType,
   defineQuery,
   string,
@@ -26,13 +25,13 @@ const schema = createSchema({
 
 describe('zero-vue', () => {
   it('works', async () => {
-    const crud = createCRUDBuilder(schema)
     const defineMutators = defineMutatorsWithType<typeof schema>()
+    const defineMutator = defineMutatorWithType<typeof schema>()
     const mutators = defineMutators({
       insert: defineMutator(
         z.object({ id: z.string(), name: z.string() }),
         async ({ tx, args: { id, name } }) => {
-          return tx.mutate(crud.user.insert({ id, name }))
+          return tx.mutate.user.insert({ id, name })
         },
       ),
     })

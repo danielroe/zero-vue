@@ -1,10 +1,9 @@
 import type { TTL } from '@rocicorp/zero'
 import {
   createBuilder,
-  createCRUDBuilder,
   createSchema,
-  defineMutator,
   defineMutatorsWithType,
+  defineMutatorWithType,
   defineQueriesWithType,
   defineQuery,
   number,
@@ -33,20 +32,20 @@ const schema = createSchema({
 async function setupTestEnvironment() {
   const userID = ref('asdf')
 
-  const crud = createCRUDBuilder(schema)
   const defineMutators = defineMutatorsWithType<typeof schema>()
+  const defineMutator = defineMutatorWithType<typeof schema>()
   const mutators = defineMutators({
     table: {
       insert: defineMutator(
         z.object({ a: z.number(), b: z.string() }),
         async ({ tx, args: { a, b } }) => {
-          return tx.mutate(crud.table.insert({ a, b }))
+          return tx.mutate.table.insert({ a, b })
         },
       ),
       update: defineMutator(
         z.object({ a: z.number(), b: z.string() }),
         async ({ tx, args: { a, b } }) => {
-          return tx.mutate(crud.table.update({ a, b }))
+          return tx.mutate.table.update({ a, b })
         },
       ),
     },
@@ -286,14 +285,14 @@ describe('useQuery', () => {
   })
 
   it('can still be used without createZero', async () => {
-    const crud = createCRUDBuilder(schema)
     const defineMutators = defineMutatorsWithType<typeof schema>()
+    const defineMutator = defineMutatorWithType<typeof schema>()
     const mutators = defineMutators({
       table: {
         insert: defineMutator(
           z.object({ a: z.number(), b: z.string() }),
           async ({ tx, args: { a, b } }) => {
-            return tx.mutate(crud.table.insert({ a, b }))
+            return tx.mutate.table.insert({ a, b })
           },
         ),
       },

@@ -1,9 +1,8 @@
 import {
   createBuilder,
-  createCRUDBuilder,
   createSchema,
-  defineMutator,
   defineMutatorsWithType,
+  defineMutatorWithType,
   defineQueriesWithType,
   defineQuery,
   number,
@@ -83,14 +82,14 @@ describe('createZeroComposables', () => {
   })
 
   it('useQuery works whithout explicitly calling useZero', async () => {
-    const crud = createCRUDBuilder(testSchema)
     const defineMutators = defineMutatorsWithType<typeof testSchema>()
+    const defineMutator = defineMutatorWithType<typeof testSchema>()
     const mutators = defineMutators({
       test: {
         insert: defineMutator(
           z.object({ id: z.number(), name: z.string() }),
           async ({ tx, args: { id, name } }) => {
-            return tx.mutate(crud.test.insert({ id, name }))
+            return tx.mutate.test.insert({ id, name })
           },
         ),
       },
