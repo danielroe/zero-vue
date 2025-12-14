@@ -1,59 +1,27 @@
 // based on https://github.com/rocicorp/mono/tree/main/packages/zero-solid
 
 import type {
+  AnyViewFactory,
   Change,
   Entry,
+  ErroredQuery,
   Format,
-  HumanReadable,
   Input,
   Output,
   Query,
-  ReadonlyJSONValue,
+  QueryErrorDetails,
+  QueryResultDetails,
   Schema,
   TTL,
-  ViewFactory,
 } from '@rocicorp/zero'
 import type { Ref } from 'vue'
-import { applyChange } from '@rocicorp/zero'
+import { applyChange, skipYields } from '@rocicorp/zero/bindings'
 import { ref } from 'vue'
 
-// zero does not export this type
-type ErroredQuery = {
-  error: 'app'
-  id: string
-  name: string
-  details: ReadonlyJSONValue
-} | {
-  error: 'zero'
-  id: string
-  name: string
-  details: ReadonlyJSONValue
-} | {
-  error: 'http'
-  id: string
-  name: string
-  status: number
-  details: ReadonlyJSONValue
-}
+export type QueryStatus = QueryResultDetails['type']
+export type QueryError = QueryErrorDetails['error']
 
-export type QueryStatus = 'complete' | 'unknown' | 'error'
-
-export type QueryError = {
-  type: 'app'
-  id: string
-  name: string
-  message: string
-  details: ReadonlyJSONValue
-} | {
-  type: 'http'
-  id: string
-  name: string
-  message: string
-  status: number
-  details: ReadonlyJSONValue
-}
-
-export class VueView<V> implements Output {
+export class VueView implements Output {
   readonly #input: Input
   readonly #format: Format
   readonly #onDestroy: () => void
@@ -81,7 +49,7 @@ export class VueView<V> implements Output {
 
     input.setOutput(this)
 
-    for (const node of input.fetch({})) {
+    for (const node of skipYields(input.fetch({}))) {
       this.#applyChange({ type: 'add', node })
     }
 
@@ -97,7 +65,7 @@ export class VueView<V> implements Output {
   }
 
   get data() {
-    return this.#data.value[''] as V
+    return this.#data.value['']
   }
 
   get status() {
@@ -122,8 +90,9 @@ export class VueView<V> implements Output {
     )
   }
 
-  push(change: Change): void {
+  push(change: Change) {
     this.#applyChange(change)
+    return Object.freeze([])
   }
 
   updateTTL(ttl: TTL): void {
@@ -133,30 +102,19 @@ export class VueView<V> implements Output {
 
 function makeError(error: ErroredQuery): QueryError {
   const message = error.name ?? 'An unknown error occurred'
-  return error.error === 'app' || error.error === 'zero'
-    ? {
-        type: 'app',
-        id: error.id,
-        name: error.name,
-        message,
-        details: error.details,
-      }
-    : {
-        type: 'http',
-        id: error.id,
-        name: error.name,
-        message,
-        status: error.status,
-        details: error.details,
-      }
+  return {
+    type: error.error,
+    message,
+    ...(error.details ? { details: error.details } : {}),
+  }
 }
 
 export function vueViewFactory<
-  TSchema extends Schema,
   TTable extends keyof TSchema['tables'] & string,
+  TSchema extends Schema,
   TReturn,
 >(
-  query: Query<TSchema, TTable, TReturn>,
+  _query: Query<TTable, TSchema, TReturn>,
   input: Input,
   format: Format,
   onDestroy: () => void,
@@ -164,7 +122,7 @@ export function vueViewFactory<
   queryComplete: true | ErroredQuery | Promise<true>,
   updateTTL: (ttl: TTL) => void,
 ) {
-  return new VueView<HumanReadable<TReturn>>(
+  return new VueView(
     input,
     onTransactionCommit,
     format,
@@ -174,4 +132,4 @@ export function vueViewFactory<
   )
 }
 
-vueViewFactory satisfies ViewFactory<Schema, string, unknown, unknown>
+vueViewFactory satisfies AnyViewFactory
