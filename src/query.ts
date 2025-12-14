@@ -15,7 +15,7 @@ import type {
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { QueryError, QueryStatus, VueView } from './view'
 
-import { addContextToQuery } from '@rocicorp/zero/bindings'
+import { addContextToQuery, asQueryInternals } from '@rocicorp/zero/bindings'
 import {
   computed,
   getCurrentInstance,
@@ -67,15 +67,18 @@ export function useQuery<
     { immediate: true },
   )
 
+  const qi = computed(() => asQueryInternals(q.value))
+  const hash = computed(() => qi.value.hash())
+
   watch(
     [
-      () => toValue(q),
       () => toValue(z),
+      hash,
       refetchKey,
     ],
-    ([q, z]) => {
+    ([z]) => {
       view.value?.destroy()
-      view.value = z.materialize(q, vueViewFactory, { ttl: toValue(ttl) })
+      view.value = z.materialize(toValue(q), vueViewFactory, { ttl: toValue(ttl) })
     },
     { immediate: true },
   )
