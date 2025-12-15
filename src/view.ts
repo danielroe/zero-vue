@@ -30,6 +30,7 @@ export class VueView implements Output {
   #data: Ref<Entry>
   #status: Ref<QueryStatus>
   #error: Ref<QueryError | undefined>
+  #isDestroyed = false
 
   constructor(
     input: Input,
@@ -77,7 +78,10 @@ export class VueView implements Output {
   }
 
   destroy() {
-    this.#onDestroy()
+    if (!this.#isDestroyed) {
+      this.#isDestroyed = true
+      this.#onDestroy()
+    }
   }
 
   #applyChange(change: Change): void {
