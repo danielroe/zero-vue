@@ -40,6 +40,18 @@ describe('createZeroComposables', () => {
     expect(zero.value.userID).toEqual('test-user')
   })
 
+  it('useConnectionState works', () => {
+    const { useConnectionState } = createZeroComposables({
+      userID: 'test-user',
+      server: null,
+      schema: testSchema,
+      kvStore: 'mem' as const,
+    })
+
+    const connectionState = useConnectionState()
+    assert(connectionState.value)
+  })
+
   it('accepts Zero instance instead of options', () => {
     const zero = new Zero({
       userID: 'test-user',
