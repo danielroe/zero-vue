@@ -88,7 +88,7 @@ export function useQuery<
   })
 
   if (getCurrentInstance()) {
-    onUnmounted(() => view.value!.destroy())
+    onUnmounted(() => view.value?.destroy())
   }
 
   return {
