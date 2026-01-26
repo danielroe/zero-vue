@@ -52,7 +52,7 @@
     "unbuild": "latest",
     "vitest": "latest",
     "vue": "3.5.27",
-    "zod": "4.3.5"
+    "zod": "4.3.6"
   },
   "resolutions": {
     "zero-vue": "link:."
