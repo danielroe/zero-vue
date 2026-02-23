@@ -40,7 +40,7 @@ importers:
         specifier: latest
         version: 5.85.0(@types/node@25.2.2)(typescript@5.9.3)
       nano-staged:
-        specifier: ^0.9.0
+        specifier: 0.9.0
         version: 0.9.0
       simple-git-hooks:
         specifier: latest
