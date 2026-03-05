@@ -85,9 +85,9 @@ Published under [MIT License](./LICENCE).
 
 <!-- Badges -->
 
-[npm-version-src]: https://img.shields.io/npm/v/zero-vue?style=flat-square
-[npm-version-href]: https://npmjs.com/package/zero-vue
-[npm-downloads-src]: https://img.shields.io/npm/dm/zero-vue?style=flat-square
+[npm-version-src]: https://npmx.dev/api/registry/badge/version/zero-vue
+[npm-version-href]: https://npmx.dev/package/zero-vue
+[npm-downloads-src]: https://npmx.dev/api/registry/badge/downloads/zero-vue
 [npm-downloads-href]: https://npm.chart.dev/zero-vue
 [github-actions-src]: https://img.shields.io/github/actions/workflow/status/danielroe/zero-vue/ci.yml?branch=main&style=flat-square
 [github-actions-href]: https://github.com/danielroe/zero-vue/actions?query=workflow%3Aci
