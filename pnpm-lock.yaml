@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@rocicorp/zero':
-        specifier: ^0.25.1
-        version: 0.25.13(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))
+        specifier: ^1.0.0
+        version: 1.0.0(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))
     devDependencies:
       '@antfu/eslint-config':
         specifier: latest
@@ -1410,6 +1410,19 @@ packages:
       expo-sqlite:
         optional: true
 
+  '@rocicorp/zero@1.0.0':
+    resolution: {integrity: sha512-kZNyLiMYBpNcchZuEM5Om4bcUGEHaFscHeTnEtamgGCqPeAUkZRNYCMg9321Kn3rRwLqkqhMhueW5tpjmGtmdw==}
+    engines: {node: '>=22'}
+    hasBin: true
+    peerDependencies:
+      '@op-engineering/op-sqlite': '>=15'
+      expo-sqlite: '>=15'
+    peerDependenciesMeta:
+      '@op-engineering/op-sqlite':
+        optional: true
+      expo-sqlite:
+        optional: true
+
   '@rolldown/pluginutils@1.0.0-rc.2':
     resolution: {integrity: sha512-izyXV/v+cHiRfozX62W9htOAvwMo4/bXKDrQ+vom1L1qRuexPock/7VZDAhnpHCLNejd3NJ6hiab+tO0D44Rgw==}
 
@@ -1705,6 +1718,9 @@ packages:
 
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
+
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@typescript-eslint/eslint-plugin@8.56.1':
     resolution: {integrity: sha512-Jz9ZztpB37dNC+HU2HI28Bs9QXpzCz+y/twHOwhyrIRdbuVDxSytJNDl6z/aAKlaRIwC7y8wJdkBv7FxYGgi0A==}
@@ -6095,6 +6111,66 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@rocicorp/zero@1.0.0(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))':
+    dependencies:
+      '@badrap/valita': 0.3.11
+      '@databases/escape-identifier': 1.0.3
+      '@databases/sql': 3.3.0
+      '@dotenvx/dotenvx': 1.52.0
+      '@drdgvhbh/postgres-error-codes': 0.0.6
+      '@fastify/cors': 10.1.0
+      '@fastify/websocket': 11.2.0
+      '@google-cloud/precise-date': 4.0.0
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api-logs': 0.203.0
+      '@opentelemetry/auto-instrumentations-node': 0.62.2(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))
+      '@opentelemetry/exporter-metrics-otlp-http': 0.203.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics': 2.5.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-node': 0.203.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-node': 2.5.1(@opentelemetry/api@1.9.0)
+      '@postgresql-typed/oids': 0.2.0
+      '@rocicorp/lock': 1.0.4
+      '@rocicorp/logger': 5.4.0
+      '@rocicorp/resolver': 1.0.2
+      '@rocicorp/zero-sqlite3': 1.0.15
+      '@standard-schema/spec': 1.1.0
+      '@types/basic-auth': 1.1.8
+      '@types/ws': 8.18.1
+      basic-auth: 2.0.1
+      chalk: 5.6.2
+      chalk-template: 1.1.2
+      chokidar: 4.0.3
+      cloudevents: 10.0.0
+      command-line-args: 6.0.1
+      command-line-usage: 7.0.3
+      compare-utf8: 0.1.1
+      defu: 6.1.4
+      eventemitter3: 5.0.4
+      fastify: 5.7.4
+      is-in-subnet: 4.0.1
+      jose: 5.10.0
+      js-xxhash: 4.0.0
+      json-custom-numbers: 3.1.1
+      kasi: 1.1.2
+      nanoid: 5.1.6
+      parse-prometheus-text-format: 1.1.1
+      pg-format: pg-format-fix@1.0.5
+      postgres: 3.4.7
+      prettier: 3.8.1
+      semver: 7.7.4
+      tsx: 4.21.0
+      url-pattern: 1.0.3
+      urlpattern-polyfill: 10.1.0
+      ws: 8.19.0
+    transitivePeerDependencies:
+      - '@75lb/nature'
+      - '@opentelemetry/core'
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+
   '@rolldown/pluginutils@1.0.0-rc.2': {}
 
   '@rollup/plugin-alias@5.1.1(rollup@4.56.0)':
@@ -6324,6 +6400,10 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@types/web-bluetooth@0.0.21': {}
+
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 24.11.0
 
   '@typescript-eslint/eslint-plugin@8.56.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
