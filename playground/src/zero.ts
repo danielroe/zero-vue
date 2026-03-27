@@ -15,7 +15,7 @@ import { schema, zql } from '~/db/schema'
 const cookies = useCookies()
 
 export interface ZeroContext {
-  sub: string
+  userID: string
 }
 
 declare module '@rocicorp/zero' {
@@ -33,9 +33,9 @@ export const mutators = defineMutators({
         id: z.string(),
         timestamp: z.number(),
       }),
-      async ({ tx, ctx, args: { mediumID, body, id, timestamp } }) => {
+      async ({ tx, ctx: { userID }, args: { mediumID, body, id, timestamp } }) => {
         return tx.mutate.message.insert({
-          senderID: ctx.sub,
+          senderID: userID,
           mediumID,
           body,
           id,
@@ -45,7 +45,7 @@ export const mutators = defineMutators({
     ),
     update: defineMutator(
       z.object({ id: z.string(), body: z.string() }),
-      async ({ tx, ctx, args: { id, body } }) => {
+      async ({ tx, ctx: { userID }, args: { id, body } }) => {
         const messageToEdit = await tx.run(
           zql.message.where('id', id).one(),
         )
@@ -53,7 +53,7 @@ export const mutators = defineMutators({
           throw new Error(`Message with id ${id} not found`)
         }
 
-        if (messageToEdit.senderID !== ctx.sub) {
+        if (messageToEdit.senderID !== userID) {
           throw new Error(`You aren't allowed to edit this message`)
         }
 
@@ -62,8 +62,8 @@ export const mutators = defineMutators({
     ),
     delete: defineMutator(
       z.object({ id: z.string() }),
-      async ({ tx, ctx, args: { id } }) => {
-        if (!ctx.sub) {
+      async ({ tx, ctx: { userID }, args: { id } }) => {
+        if (!userID) {
           throw new Error('You must be logged in to delete')
         }
 
@@ -115,6 +115,9 @@ export const { useZero, useQuery } = createZeroComposables(() => {
 
   return {
     userID,
+    context: {
+      userID,
+    },
     // auth: () => encodedJWT || undefined,
     server: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
     schema,
