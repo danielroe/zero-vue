@@ -26,6 +26,8 @@ import {
 } from 'vue'
 import { vueViewFactory } from './view'
 
+type Falsy = false | 0 | '' | null | undefined
+
 const DEFAULT_TTL_MS = 1_000 * 60 * 5
 
 export interface UseQueryOptions {
@@ -38,6 +40,13 @@ export interface QueryResult<TReturn> {
   error: ComputedRef<QueryError & { retry: () => void } | undefined>
 }
 
+export interface MaybeQueryResult<TReturn> {
+  data: ComputedRef<HumanReadable<TReturn> | undefined>
+  status: ComputedRef<QueryStatus | 'disabled'>
+  error: ComputedRef<QueryError & { retry: () => void } | undefined>
+}
+
+// Overload 1: Query
 export function useQuery<
   TTable extends keyof TSchema['tables'] & string,
   TInput extends ReadonlyJSONValue | undefined,
@@ -50,7 +59,37 @@ export function useQuery<
   z: MaybeRefOrGetter<Zero<TSchema, MD, TContext>>,
   query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext>>,
   options?: MaybeRefOrGetter<UseQueryOptions>,
-): QueryResult<TReturn> {
+): QueryResult<TReturn>
+
+// Overload 2: Maybe query
+export function useQuery<
+  TTable extends keyof TSchema['tables'] & string,
+  TInput extends ReadonlyJSONValue | undefined,
+  TOutput extends ReadonlyJSONValue | undefined,
+  TSchema extends Schema = DefaultSchema,
+  TReturn = PullRow<TTable, TSchema>,
+  TContext = DefaultContext,
+  MD extends CustomMutatorDefs | undefined = undefined,
+>(
+  z: MaybeRefOrGetter<Zero<TSchema, MD, TContext>>,
+  query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext> | Falsy>,
+  options?: MaybeRefOrGetter<UseQueryOptions>,
+): MaybeQueryResult<TReturn>
+
+// Implementation
+export function useQuery<
+  TTable extends keyof TSchema['tables'] & string,
+  TInput extends ReadonlyJSONValue | undefined,
+  TOutput extends ReadonlyJSONValue | undefined,
+  TSchema extends Schema = DefaultSchema,
+  TReturn = PullRow<TTable, TSchema>,
+  TContext = DefaultContext,
+  MD extends CustomMutatorDefs | undefined = undefined,
+>(
+  z: MaybeRefOrGetter<Zero<TSchema, MD, TContext>>,
+  query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext> | Falsy>,
+  options?: MaybeRefOrGetter<UseQueryOptions>,
+): QueryResult<TReturn> | MaybeQueryResult<TReturn> {
   const ttl = computed(() => toValue(options)?.ttl ?? DEFAULT_TTL_MS)
   const view = shallowRef<VueView | null>(null)
   const refetchKey = shallowRef(0)
@@ -62,13 +101,13 @@ export function useQuery<
       () => toValue(z),
     ],
     ([query, z]) => {
-      q.value = addContextToQuery(toValue(query), toValue(z).context)
+      q.value = query ? addContextToQuery(toValue(query), toValue(z).context) : undefined
     },
     { immediate: true },
   )
 
-  const qi = computed(() => asQueryInternals(q.value))
-  const hash = computed(() => qi.value.hash())
+  const qi = computed(() => q.value ? asQueryInternals(q.value) : undefined)
+  const hash = computed(() => qi.value?.hash())
 
   watch(
     [
@@ -78,7 +117,12 @@ export function useQuery<
     ],
     ([z]) => {
       view.value?.destroy()
-      view.value = z.materialize(toValue(q), vueViewFactory, { ttl: toValue(ttl) })
+      if (!hash.value) {
+        view.value = null
+      }
+      else {
+        view.value = z.materialize(toValue(q), vueViewFactory, { ttl: toValue(ttl) })
+      }
     },
     { immediate: true },
   )
@@ -93,7 +137,7 @@ export function useQuery<
 
   return {
     data: computed(() => view.value?.data as HumanReadable<TReturn>),
-    status: computed(() => view.value?.status ?? 'unknown'),
+    status: computed(() => view.value?.status ?? 'disabled'),
     error: computed(() => view.value?.error
       ? {
           retry: () => { refetchKey.value++ },
