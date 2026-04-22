@@ -14,7 +14,7 @@
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
-    "@rocicorp/zero": "^0.25.1",
+    "@rocicorp/zero": "^0.26.0",
     "@vueuse/integrations": "^14.0.0",
     "jose": "^6.0.0",
     "universal-cookie": "^8.0.0",
@@ -25,11 +25,11 @@
   "devDependencies": {
     "@tsconfig/node24": "24.0.4",
     "@types/js-cookie": "3.0.6",
-    "@types/node": "24.11.0",
+    "@types/node": "24.12.2",
     "@vitejs/plugin-vue": "6.0.4",
-    "@vue/tsconfig": "0.9.0",
+    "@vue/tsconfig": "0.9.1",
     "typescript": "5.9.3",
     "vite": "7.3.1",
-    "vue-tsc": "3.2.5"
+    "vue-tsc": "3.2.7"
   }
 }
