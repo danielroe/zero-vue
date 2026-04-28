@@ -61,7 +61,7 @@ useInterval(
       action.value = undefined
     }
   },
-  action.value !== undefined ? 1000 / 60 : null,
+  () => action.value !== undefined ? 1000 / 60 : null,
 )
 
 const INITIAL_HOLD_DELAY_MS = 300
