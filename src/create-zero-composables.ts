@@ -3,6 +3,7 @@ import type {
   CustomMutatorDefs,
   DefaultContext,
   DefaultSchema,
+  Falsy,
   PullRow,
   QueryOrQueryRequest,
   ReadonlyJSONValue,
@@ -10,7 +11,7 @@ import type {
   ZeroOptions,
 } from '@rocicorp/zero'
 import type { MaybeRefOrGetter, Ref, ShallowRef } from 'vue'
-import type { QueryResult, UseQueryOptions } from './query'
+import type { MaybeQueryResult, QueryResult, UseQueryOptions } from './query'
 import { Zero } from '@rocicorp/zero'
 import { getCurrentInstance, onUnmounted, readonly, ref, shallowRef, toValue, watch } from 'vue'
 import { useQuery as _useQuery } from './query'
@@ -57,7 +58,27 @@ export function createZeroComposables<
   >(
     query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext>>,
     options?: MaybeRefOrGetter<UseQueryOptions>,
-  ): QueryResult<TReturn> {
+  ): QueryResult<TReturn>
+
+  function useQuery<
+    TTable extends keyof TSchema['tables'] & string,
+    TInput extends ReadonlyJSONValue | undefined,
+    TOutput extends ReadonlyJSONValue | undefined,
+    TReturn = PullRow<TTable, TSchema>,
+  >(
+    query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext> | Falsy>,
+    options?: MaybeRefOrGetter<UseQueryOptions>,
+  ): MaybeQueryResult<TReturn>
+
+  function useQuery<
+    TTable extends keyof TSchema['tables'] & string,
+    TInput extends ReadonlyJSONValue | undefined,
+    TOutput extends ReadonlyJSONValue | undefined,
+    TReturn = PullRow<TTable, TSchema>,
+  >(
+    query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext> | Falsy>,
+    options?: MaybeRefOrGetter<UseQueryOptions>,
+  ): QueryResult<TReturn> | MaybeQueryResult<TReturn> {
     const zero = useZero()
     return _useQuery(zero, query, options)
   }

@@ -1,4 +1,4 @@
-import type { Query } from '@rocicorp/zero'
+import type { ErroredQuery, Query } from '@rocicorp/zero'
 
 import { resolver } from '@rocicorp/resolver'
 import {
@@ -1375,6 +1375,37 @@ describe('vueView', () => {
     queryCompleteResolver.resolve(true)
     await nextTick()
     expect(view.status).toEqual('complete')
+  })
+
+  it('uses query error message', async () => {
+    const { zero, mutators, tableQuery } = setupSimple()
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+
+    const queryError = {
+      id: 'q1',
+      name: 'TestQuery',
+      message: 'Something went wrong',
+      details: { reason: 'test' },
+      error: 'app',
+    } satisfies ErroredQuery
+
+    const view = zero.materialize(tableQuery, (_, input) => {
+      return new VueView(
+        input,
+        () => {},
+        { singular: false, relationships: {} },
+        () => {},
+        queryError,
+        () => {},
+      )
+    })
+
+    expect(view.status).toEqual('error')
+    expect(view.error).toEqual({
+      type: 'app',
+      message: 'Something went wrong',
+      details: { reason: 'test' },
+    })
   })
 })
 
