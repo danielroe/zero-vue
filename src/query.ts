@@ -4,6 +4,7 @@ import type {
   CustomMutatorDefs,
   DefaultContext,
   DefaultSchema,
+  Falsy,
   HumanReadable,
   PullRow,
   QueryOrQueryRequest,
@@ -15,7 +16,7 @@ import type {
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
 import type { QueryError, QueryStatus, VueView } from './view'
 
-import { addContextToQuery, asQueryInternals } from '@rocicorp/zero/bindings'
+import { addContextToQuery, asQueryInternals, DEFAULT_TTL_MS } from '@rocicorp/zero/bindings'
 import {
   computed,
   getCurrentInstance,
@@ -25,10 +26,6 @@ import {
   watch,
 } from 'vue'
 import { vueViewFactory } from './view'
-
-type Falsy = false | 0 | '' | null | undefined
-
-const DEFAULT_TTL_MS = 1_000 * 60 * 5
 
 export interface UseQueryOptions {
   ttl?: TTL | undefined
