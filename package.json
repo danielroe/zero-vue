@@ -54,9 +54,6 @@
     "vue": "3.5.29",
     "zod": "4.3.6"
   },
-  "resolutions": {
-    "zero-vue": "link:."
-  },
   "simple-git-hooks": {
     "pre-commit": "npx nano-staged"
   },

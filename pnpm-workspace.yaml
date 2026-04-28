@@ -17,3 +17,6 @@ onlyBuiltDependencies:
   - '@rocicorp/zero-sqlite3'
   - oxc-resolver
   - simple-git-hooks
+
+overrides:
+  zero-vue: "link:."
