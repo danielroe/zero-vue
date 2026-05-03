@@ -8,6 +8,8 @@ trustPolicyExclude:
 packages:
   - playground
 
+overrides:
+  zero-vue: 'link:.'
 ignoredBuiltDependencies:
   - esbuild
   - protobufjs
