@@ -1,4 +1,4 @@
-import type { ErroredQuery, Query } from '@rocicorp/zero'
+import type { Change, ErroredQuery, Node, Query } from '@rocicorp/zero'
 
 import { resolver } from '@rocicorp/resolver'
 import {
@@ -215,6 +215,22 @@ function setupCollapse() {
   const issuesWithLabelsQuery = addContextToQuery(queries.issuesWithLabelsQuery(), zero.context)
 
   return { zero, queries, issuesWithLabelsQuery }
+}
+
+function makeAddChange(node: Node): Change {
+  return [0, node, null]
+}
+
+function makeRemoveChange(node: Node): Change {
+  return [1, node, null]
+}
+
+function makeEditChange(node: Node, oldNode: Node): Change {
+  return [2, node, oldNode]
+}
+
+function makeChildChange(node: Node, child: { relationshipName: string, change: Change }): Change {
+  return [3, node, child]
 }
 
 describe('vueView', () => {
@@ -663,10 +679,7 @@ describe('vueView', () => {
       },
     } as const
 
-    view.push({
-      type: 'add',
-      ...changeSansType,
-    })
+    view.push(makeAddChange(changeSansType.node))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -685,20 +698,13 @@ describe('vueView', () => {
     ]
   `)
 
-    view.push({
-      type: 'remove',
-      ...changeSansType,
-    })
+    view.push(makeRemoveChange(changeSansType.node))
     expect(view.data).toEqual([])
 
-    view.push({
-      type: 'add',
-      ...changeSansType,
-    })
+    view.push(makeAddChange(changeSansType.node))
 
-    view.push({
-      type: 'child',
-      node: {
+    view.push(makeChildChange(
+      {
         row: {
           id: 1,
           name: 'issue',
@@ -746,32 +752,29 @@ describe('vueView', () => {
           ],
         },
       },
-      child: {
+      {
         relationshipName: 'labels',
-        change: {
-          type: 'add',
-          node: {
-            row: {
-              id: 2,
-              issueId: 1,
-              labelId: 2,
-              extra: 'b',
-            },
-            relationships: {
-              labels: () => [
-                {
-                  row: {
-                    id: 2,
-                    name: 'label2',
-                  },
-                  relationships: {},
-                },
-              ],
-            },
+        change: makeAddChange({
+          row: {
+            id: 2,
+            issueId: 1,
+            labelId: 2,
+            extra: 'b',
           },
-        },
+          relationships: {
+            labels: () => [
+              {
+                row: {
+                  id: 2,
+                  name: 'label2',
+                },
+                relationships: {},
+              },
+            ],
+          },
+        }),
       },
-    })
+    ))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -796,9 +799,8 @@ describe('vueView', () => {
   `)
 
     // edit the hidden row
-    view.push({
-      type: 'child',
-      node: {
+    view.push(makeChildChange(
+      {
         row: {
           id: 1,
           name: 'issue',
@@ -846,30 +848,10 @@ describe('vueView', () => {
           ],
         },
       },
-      child: {
+      {
         relationshipName: 'labels',
-        change: {
-          type: 'edit',
-          oldNode: {
-            row: {
-              id: 2,
-              issueId: 1,
-              labelId: 2,
-              extra: 'b',
-            },
-            relationships: {
-              labels: () => [
-                {
-                  row: {
-                    id: 2,
-                    name: 'label2',
-                  },
-                  relationships: {},
-                },
-              ],
-            },
-          },
-          node: {
+        change: makeEditChange(
+          {
             row: {
               id: 2,
               issueId: 1,
@@ -888,9 +870,28 @@ describe('vueView', () => {
               ],
             },
           },
-        },
+          {
+            row: {
+              id: 2,
+              issueId: 1,
+              labelId: 2,
+              extra: 'b',
+            },
+            relationships: {
+              labels: () => [
+                {
+                  row: {
+                    id: 2,
+                    name: 'label2',
+                  },
+                  relationships: {},
+                },
+              ],
+            },
+          },
+        ),
       },
-    })
+    ))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -915,9 +916,8 @@ describe('vueView', () => {
   `)
 
     // edit the leaf
-    view.push({
-      type: 'child',
-      node: {
+    view.push(makeChildChange(
+      {
         row: {
           id: 1,
           name: 'issue',
@@ -965,11 +965,10 @@ describe('vueView', () => {
           ],
         },
       },
-      child: {
+      {
         relationshipName: 'labels',
-        change: {
-          type: 'child',
-          node: {
+        change: makeChildChange(
+          {
             row: {
               id: 2,
               issueId: 1,
@@ -988,29 +987,28 @@ describe('vueView', () => {
               ],
             },
           },
-          child: {
+          {
             relationshipName: 'labels',
-            change: {
-              type: 'edit',
-              oldNode: {
-                row: {
-                  id: 2,
-                  name: 'label2',
-                },
-                relationships: {},
-              },
-              node: {
+            change: makeEditChange(
+              {
                 row: {
                   id: 2,
                   name: 'label2x',
                 },
                 relationships: {},
               },
-            },
+              {
+                row: {
+                  id: 2,
+                  name: 'label2',
+                },
+                relationships: {},
+              },
+            ),
           },
-        },
+        ),
       },
-    })
+    ))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -1071,10 +1069,7 @@ describe('vueView', () => {
         },
       },
     } as const
-    view.push({
-      type: 'add',
-      ...changeSansType,
-    })
+    view.push(makeAddChange(changeSansType.node))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
