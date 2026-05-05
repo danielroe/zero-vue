@@ -118,8 +118,7 @@ export const { useZero, useQuery } = createZeroComposables(() => {
     context: {
       userID,
     },
-    // auth: () => encodedJWT || undefined,
-    server: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
+    cacheURL: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
     schema,
     mutators,
     // This is often easier to develop with if you're frequently changing

@@ -105,7 +105,7 @@ export class VueView implements Output {
 }
 
 function makeError(error: ErroredQuery): QueryError {
-  const message = error.name ?? 'An unknown error occurred'
+  const message = error.message ?? 'An unknown error occurred'
   return {
     type: error.error,
     message,

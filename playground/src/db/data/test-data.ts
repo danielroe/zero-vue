@@ -24,7 +24,7 @@ const replies = [
 export function randomMessage(users: readonly User[], mediums: readonly Medium[]): Message {
   const id = randID()
   const mediumID = mediums[randInt(mediums.length)]!.id
-  const timestamp = randBetween(1727395200000, new Date().getTime())
+  const timestamp = randBetween(1727395200000, Date.now())
   const isRequest = randInt(10) <= 6
   const messages = isRequest ? requests : replies
   const senders = users.filter(u => u.partner === !isRequest)

@@ -1,3 +1,3 @@
 export { createZeroComposables } from './create-zero-composables'
-export type { QueryResult, UseQueryOptions } from './query'
+export type { MaybeQueryResult, QueryResult, UseQueryOptions } from './query'
 export { useQuery } from './query'

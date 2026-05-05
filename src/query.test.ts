@@ -175,6 +175,48 @@ describe('useQuery', () => {
     expect(updateTTLSpy).toHaveBeenCalledExactlyOnceWith('10m')
   })
 
+  it('useQuery supports disabled maybe queries', async () => {
+    const { zero, queries, useQuery } = await setupTestEnvironment()
+    const enabled = ref(false)
+    const materializeSpy = vi.spyOn(zero.value, 'materialize')
+
+    const { data: rows, status } = useQuery(() => enabled.value && queries.table())
+
+    expect(rows.value).toBeUndefined()
+    expect(status.value).toBe('disabled')
+    expect(materializeSpy).not.toHaveBeenCalled()
+
+    enabled.value = true
+    await nextTick()
+
+    expect(materializeSpy).toHaveBeenCalledTimes(1)
+    expect(rows.value).toMatchInlineSnapshot(`
+[
+  {
+    "a": 1,
+    "b": "a",
+    Symbol(rc): 1,
+  },
+  {
+    "a": 2,
+    "b": "b",
+    Symbol(rc): 1,
+  },
+]
+`)
+    expect(status.value).toEqual('unknown')
+
+    const view: VueView = materializeSpy.mock.results[0]!.value
+    const destroySpy = vi.spyOn(view, 'destroy')
+
+    enabled.value = false
+    await nextTick()
+
+    expect(destroySpy).toHaveBeenCalledTimes(1)
+    expect(rows.value).toBeUndefined()
+    expect(status.value).toBe('disabled')
+  })
+
   it('useQuery deps change', async () => {
     const { queries, useQuery } = await setupTestEnvironment()
 
