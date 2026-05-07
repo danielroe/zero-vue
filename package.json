@@ -1,7 +1,7 @@
 {
   "name": "zero-vue",
   "type": "module",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "packageManager": "pnpm@10.30.3",
   "description": "",
   "license": "MIT",
