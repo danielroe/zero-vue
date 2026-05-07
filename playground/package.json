@@ -14,7 +14,6 @@
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
-    "@rocicorp/zero": "^1.4.0",
     "@vueuse/integrations": "^14.3.0",
     "jose": "^6.2.3",
     "universal-cookie": "^8.1.2",
