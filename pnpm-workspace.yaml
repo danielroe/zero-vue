@@ -10,12 +10,11 @@ packages:
 
 overrides:
   zero-vue: 'link:.'
-ignoredBuiltDependencies:
-  - esbuild
-  - protobufjs
-  - unrs-resolver
 
-onlyBuiltDependencies:
-  - '@rocicorp/zero-sqlite3'
-  - oxc-resolver
-  - simple-git-hooks
+allowBuilds:
+  '@rocicorp/zero-sqlite3': true
+  esbuild: false
+  oxc-resolver: true
+  protobufjs: false
+  simple-git-hooks: true
+  unrs-resolver: false
