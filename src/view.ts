@@ -7,13 +7,16 @@ import type {
   ErroredQuery,
   Format,
   Input,
+  Node,
   Output,
   Query,
   QueryErrorDetails,
   QueryResultDetails,
   Schema,
+  Stream,
   TTL,
 } from '@rocicorp/zero'
+import type { ViewChange } from '@rocicorp/zero/bindings'
 import type { Ref } from 'vue'
 import { applyChange, skipYields } from '@rocicorp/zero/bindings'
 import { ref } from 'vue'
@@ -84,7 +87,7 @@ export class VueView implements Output {
     }
   }
 
-  #applyChange(change: Change): void {
+  #applyChange(change: ViewChange): void {
     applyChange(
       this.#data.value,
       change,
@@ -95,12 +98,66 @@ export class VueView implements Output {
   }
 
   push(change: Change) {
-    this.#applyChange(change)
+    this.#applyChange(materializeRelationships(change))
     return Object.freeze([])
   }
 
   updateTTL(ttl: TTL): void {
     this.#updateTTL(ttl)
+  }
+}
+
+function materializeRelationships(change: Change): ViewChange {
+  switch (change[0]) {
+    case 0:
+      return {
+        type: 'add',
+        node: materializeNodeRelationships(change[1]),
+      }
+    case 1:
+      return {
+        type: 'remove',
+        node: materializeNodeRelationships(change[1]),
+      }
+    case 2:
+      return {
+        type: 'edit',
+        node: { row: change[1].row },
+        oldNode: { row: change[2].row },
+      }
+    case 3:
+      return {
+        type: 'child',
+        node: { row: change[1].row },
+        child: {
+          relationshipName: change[2].relationshipName,
+          change: materializeRelationships(change[2].change),
+        },
+      }
+  }
+}
+
+function materializeNodeRelationships(node: Node): Node {
+  const relationships: Record<string, () => Stream<Node>> = {}
+
+  for (const relationship in node.relationships) {
+    const children = node.relationships[relationship]
+    if (!children) {
+      continue
+    }
+
+    const materialized: Node[] = []
+
+    for (const child of skipYields(children())) {
+      materialized.push(materializeNodeRelationships(child))
+    }
+
+    relationships[relationship] = () => materialized
+  }
+
+  return {
+    row: node.row,
+    relationships,
   }
 }
 
