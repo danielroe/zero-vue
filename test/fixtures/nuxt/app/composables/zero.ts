@@ -5,14 +5,11 @@ import {
   defineQuery,
   escapeLike,
 } from '@rocicorp/zero'
-import { useCookies } from '@vueuse/integrations/useCookies'
 import { decodeJwt } from 'jose'
 import { createZeroComposables } from 'zero-vue'
 import z from 'zod'
 
-import { schema, zql } from '~/db/schema'
-
-const cookies = useCookies()
+import { schema, zql } from '#fx/db/schema'
 
 export interface ZeroContext {
   userID: string
@@ -105,24 +102,41 @@ export const queries = defineQueries({
   mediums: {
     all: defineQuery(() => zql.medium),
   },
-
 })
 
-export const { useZero, useQuery } = createZeroComposables(() => {
-  const encodedJWT = cookies.get('jwt')
-  const decodedJWT = encodedJWT && decodeJwt(encodedJWT)
-  const userID = decodedJWT?.sub ? (decodedJWT.sub as string) : 'anon'
+function createComposables() {
+  return createZeroComposables(() => {
+    const jwt = useCookie('jwt')
+    const decoded = jwt.value ? decodeJwt(jwt.value) : undefined
+    const userID = typeof decoded?.sub === 'string' ? decoded.sub : 'anon'
+    const config = useRuntimeConfig()
 
-  return {
-    userID,
-    context: {
+    return {
       userID,
-    },
-    cacheURL: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
-    schema,
-    mutators,
-    // This is often easier to develop with if you're frequently changing
-    // the schema. Switch to 'idb' for local-persistence.
-    kvStore: 'mem',
+      auth: jwt.value || undefined,
+      context: { userID },
+      server: import.meta.client ? config.public.zero.cacheURL : undefined,
+      schema,
+      mutators,
+      kvStore: 'mem' as const,
+    }
+  })
+}
+
+type ZeroComposables = ReturnType<typeof createComposables>
+
+declare module '#app' {
+  interface NuxtApp {
+    _zeroComposables?: ZeroComposables
   }
-})
+}
+
+function getZeroComposables(): ZeroComposables {
+  const nuxt = useNuxtApp()
+  nuxt._zeroComposables ??= createComposables()
+  return nuxt._zeroComposables
+}
+
+export const useZero: ZeroComposables['useZero'] = () => getZeroComposables().useZero()
+export const useQuery = ((query: unknown, options?: unknown) =>
+  (getZeroComposables().useQuery as (...args: unknown[]) => unknown)(query, options)) as ZeroComposables['useQuery']
