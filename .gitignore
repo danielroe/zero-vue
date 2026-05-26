@@ -1,10 +1,16 @@
 dist
 node_modules
 coverage
+.nuxt
+.output
+.data
 .vscode
 .DS_Store
 .eslintcache
+*.tsbuildinfo
 *.log*
 *.env*
 
-!playground/.env
+!test/fixtures/_shared/.env
+!test/fixtures/vue/.env
+!test/fixtures/nuxt/.env

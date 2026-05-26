@@ -5,13 +5,17 @@
     "paths": {
       "~/*": [
         "./src/*"
+      ],
+      "#fx/*": [
+        "../_shared/*"
       ]
     }
   },
   "include": [
     "env.d.ts",
     "src/**/*",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "../_shared/**/*"
   ],
   "exclude": [
     "src/**/__tests__/*"

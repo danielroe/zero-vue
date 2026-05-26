@@ -1,5 +1,5 @@
-import type { Medium, Message, User } from '~/db/schema'
-import { randBetween, randID, randInt } from '~/utils/rand'
+import type { Medium, Message, User } from '../schema'
+import { randBetween, randID, randInt } from '../../utils/rand'
 
 const requests = [
   'Hey guys, is the zero package ready yet?',

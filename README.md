@@ -64,7 +64,7 @@ const { data: users } = useQuery(() => zero.value.query.user)
 ```
 
 > [!TIP]
-> See [the playground](./playground) for a full working example based on [rocicorp/hello-zero](https://github.com/rocicorp/hello-zero), or check out [danielroe/hello-zero-nuxt](https://github.com/danielroe/hello-zero-nuxt) to see how to set things up with [Nuxt](https://nuxt.com/).
+> See [the Vue fixture](./test/fixtures/vue) or [the Nuxt fixture](./test/fixtures/nuxt) for full working examples based on [rocicorp/hello-zero](https://github.com/rocicorp/hello-zero).
 
 ## 💻 Development
 

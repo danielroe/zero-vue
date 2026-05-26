@@ -26,7 +26,8 @@
     "prepare": "simple-git-hooks",
     "prepack": "pnpm build",
     "prepublishOnly": "pnpm lint && pnpm test",
-    "test": "pnpm test:unit && pnpm test:types",
+    "test": "pnpm test:unit && pnpm test:types && pnpm test:e2e",
+    "test:e2e": "pnpm -r --workspace-concurrency=1 test:e2e",
     "test:unit": "vitest",
     "test:types": "tsc --noEmit && pnpm -r test:types"
   },
