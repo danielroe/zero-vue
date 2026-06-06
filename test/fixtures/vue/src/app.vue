@@ -3,10 +3,10 @@ import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { SignJWT } from 'jose'
 import { computed, ref } from 'vue'
-import { useInterval } from '~/composables/use-interval'
-import { randomMessage } from '~/db/data/test-data'
-import { formatDate } from '~/utils/date'
-import { randInt } from '~/utils/rand'
+import { useInterval } from '#fx/composables/use-interval'
+import { randomMessage } from '#fx/db/data/test-data'
+import { formatDate } from '#fx/utils/date'
+import { randInt } from '#fx/utils/rand'
 import { mutators, queries, useQuery, useZero } from './zero'
 
 const cookies = useCookies()
