@@ -8,11 +8,10 @@
   "repository": "danielroe/zero-vue",
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
@@ -20,7 +19,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "unbuild",
+    "build": "tsdown",
     "dev": "vitest dev",
     "lint": "eslint .",
     "prepare": "simple-git-hooks",
@@ -46,8 +45,8 @@
     "knip": "latest",
     "nano-staged": "1.0.2",
     "simple-git-hooks": "latest",
+    "tsdown": "0.22.0",
     "typescript": "latest",
-    "unbuild": "latest",
     "vitest": "latest",
     "vue": "3.5.35",
     "zod": "4.4.3"

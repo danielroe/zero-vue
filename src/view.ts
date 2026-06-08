@@ -68,19 +68,19 @@ export class VueView implements Output {
     }
   }
 
-  get data() {
+  get data(): Entry[string] {
     return this.#data.value['']
   }
 
-  get status() {
+  get status(): QueryStatus {
     return this.#status.value
   }
 
-  get error() {
+  get error(): QueryError | undefined {
     return this.#error.value
   }
 
-  destroy() {
+  destroy(): void {
     if (!this.#isDestroyed) {
       this.#isDestroyed = true
       this.#onDestroy()
@@ -97,7 +97,7 @@ export class VueView implements Output {
     )
   }
 
-  push(change: Change) {
+  push(change: Change): readonly never[] {
     this.#applyChange(materializeRelationships(change))
     return Object.freeze([])
   }
@@ -182,7 +182,7 @@ export function vueViewFactory<
   onTransactionCommit: (cb: () => void) => void,
   queryComplete: true | ErroredQuery | Promise<true>,
   updateTTL: (ttl: TTL) => void,
-) {
+): VueView {
   return new VueView(
     input,
     onTransactionCommit,
