@@ -48,7 +48,7 @@
     "tsdown": "0.22.2",
     "typescript": "latest",
     "vitest": "latest",
-    "vue": "3.5.35",
+    "vue": "3.5.38",
     "zod": "4.4.3"
   },
   "simple-git-hooks": {
