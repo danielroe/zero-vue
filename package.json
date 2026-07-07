@@ -34,7 +34,7 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@rocicorp/zero": "^1.4.0"
+    "@rocicorp/zero": "^1.7.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "latest",
