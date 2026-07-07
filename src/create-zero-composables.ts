@@ -10,11 +10,40 @@ import type {
   Schema,
   ZeroOptions,
 } from '@rocicorp/zero'
-import type { MaybeRefOrGetter, Ref, ShallowRef } from 'vue'
+import type { DeepReadonly, MaybeRefOrGetter, Ref, ShallowRef } from 'vue'
 import type { MaybeQueryResult, QueryResult, UseQueryOptions } from './query'
 import { Zero } from '@rocicorp/zero'
 import { getCurrentInstance, onUnmounted, readonly, ref, shallowRef, toValue, watch } from 'vue'
 import { useQuery as _useQuery } from './query'
+
+export interface ZeroComposables<
+  TSchema extends Schema,
+  MD extends CustomMutatorDefs | undefined,
+  TContext,
+> {
+  useZero: () => ShallowRef<Zero<TSchema, MD, TContext>>
+  useQuery: {
+    <
+      TTable extends keyof TSchema['tables'] & string,
+      TInput extends ReadonlyJSONValue | undefined,
+      TOutput extends ReadonlyJSONValue | undefined,
+      TReturn = PullRow<TTable, TSchema>,
+    >(
+      query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext>>,
+      options?: MaybeRefOrGetter<UseQueryOptions>,
+    ): QueryResult<TReturn>
+    <
+      TTable extends keyof TSchema['tables'] & string,
+      TInput extends ReadonlyJSONValue | undefined,
+      TOutput extends ReadonlyJSONValue | undefined,
+      TReturn = PullRow<TTable, TSchema>,
+    >(
+      query: MaybeRefOrGetter<QueryOrQueryRequest<TTable, TInput, TOutput, TSchema, TReturn, TContext> | Falsy>,
+      options?: MaybeRefOrGetter<UseQueryOptions>,
+    ): MaybeQueryResult<TReturn>
+  }
+  useConnectionState: () => DeepReadonly<Ref<ConnectionState>>
+}
 
 export function createZeroComposables<
   TSchema extends Schema = DefaultSchema,
@@ -22,7 +51,7 @@ export function createZeroComposables<
   TContext = DefaultContext,
 >(
   optsOrZero: MaybeRefOrGetter<ZeroOptions<TSchema, MD, TContext> | { zero: Zero<TSchema, MD, TContext> }>,
-) {
+): ZeroComposables<TSchema, MD, TContext> {
   let z: ShallowRef<Zero<TSchema, MD, TContext>>
   let connectionState: Ref<ConnectionState>
   let unsubscribe: () => void
@@ -83,7 +112,7 @@ export function createZeroComposables<
     return _useQuery(zero, query, options)
   }
 
-  function useConnectionState() {
+  function useConnectionState(): DeepReadonly<Ref<ConnectionState>> {
     if (!connectionState) {
       useZero()
 
