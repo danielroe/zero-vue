@@ -1431,7 +1431,8 @@ describe('vueViewFactory', () => {
     })
 
     expect(view).toBeDefined()
-    expect(onTransactionCommit).not.toHaveBeenCalled()
+    expect(onTransactionCommit).toHaveBeenCalledTimes(1)
+    expect(onTransactionCommit).toHaveBeenCalledWith(expect.any(Function))
     expect(onDestroy).not.toHaveBeenCalled()
     view.destroy()
     expect(onDestroy).toHaveBeenCalledTimes(1)

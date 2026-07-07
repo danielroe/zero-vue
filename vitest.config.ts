@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
@@ -14,5 +14,6 @@ export default defineConfig({
       include: ['src'],
       reporter: ['text', 'json', 'html'],
     },
+    exclude: [...configDefaults.exclude, 'test/fixtures/**'],
   },
 })

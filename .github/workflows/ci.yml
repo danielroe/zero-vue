@@ -55,5 +55,8 @@ jobs:
       - name: 🧪 Test project
         run: pnpm test:unit -- --coverage
 
+      - name: 🧪 Test fixtures
+        run: pnpm test:e2e
+
       - name: 🟩 Coverage
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
