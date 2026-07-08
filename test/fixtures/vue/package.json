@@ -10,12 +10,14 @@
     "dev:zero-cache": "cd ../_shared && zero-cache-dev -p db/schema.ts",
     "dev:db-up": "cd ../_shared && docker compose --env-file .env -f docker/docker-compose.yml up",
     "dev:db-down": "cd ../_shared && docker compose --env-file .env -f docker/docker-compose.yml down",
-    "dev:clean": "cd ../_shared && source .env && docker volume rm -f docker_zstart_pgdata && rm -rf \"${ZERO_REPLICA_FILE}\"*",
+    "dev:clean": "cd ../_shared && source .env && docker compose --env-file .env -f docker/docker-compose.yml down -v && rm -rf \"${ZERO_REPLICA_FILE}\"*",
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
     "@vueuse/integrations": "^14.3.0",
+    "h3": "^1.15.11",
     "jose": "^6.2.3",
+    "postgres": "^3.4.7",
     "universal-cookie": "^8.1.2",
     "vue": "^3.5.34",
     "zero-vue": "link:",

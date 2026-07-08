@@ -9,7 +9,7 @@
     "dev:zero-cache": "cd ../_shared && zero-cache-dev -p db/schema.ts",
     "dev:db-up": "cd ../_shared && docker compose --env-file .env -f docker/docker-compose.yml up",
     "dev:db-down": "cd ../_shared && docker compose --env-file .env -f docker/docker-compose.yml down",
-    "dev:clean": "cd ../_shared && source .env && docker volume rm -f docker_zstart_pgdata && rm -rf \"${ZERO_REPLICA_FILE}\"*",
+    "dev:clean": "cd ../_shared && source .env && docker compose --env-file .env -f docker/docker-compose.yml down -v && rm -rf \"${ZERO_REPLICA_FILE}\"*",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

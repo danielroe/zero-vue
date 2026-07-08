@@ -13,9 +13,7 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/index.css'],
   runtimeConfig: {
-    zero: {
-      authSecret: '',
-    },
+    authSecret: '',
     public: {
       zero: {
         cacheURL: '',

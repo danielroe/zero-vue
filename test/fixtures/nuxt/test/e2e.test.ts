@@ -1,14 +1,15 @@
+import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
 import { jwtVerify } from 'jose'
 import { describe, expect, it } from 'vitest'
 
-const authSecret = 'test-secret-for-e2e'
+const authSecret = randomUUID()
 
 await setup({
   rootDir: fileURLToPath(new URL('..', import.meta.url)),
   env: {
-    NUXT_ZERO_AUTH_SECRET: authSecret,
+    NUXT_AUTH_SECRET: authSecret,
   },
 })
 

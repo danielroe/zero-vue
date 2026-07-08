@@ -10,6 +10,7 @@
     "noEmit": true
   },
   "include": [
+    "server/**/*",
     "vite.config.*",
     "vitest.config.*",
     "cypress.config.*",

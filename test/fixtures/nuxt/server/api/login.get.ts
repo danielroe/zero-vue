@@ -1,4 +1,7 @@
+import { randomBytes } from 'node:crypto'
 import { SignJWT } from 'jose'
+
+const fallbackAuthSecret = randomBytes(32).toString('base64url')
 
 // See docker/seed.sql for the seeded user list.
 const userIDs = [
@@ -18,10 +21,8 @@ function randomInt(max: number) {
 }
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(event)
-  if (!config.zero.authSecret) {
-    throw createError({ statusCode: 500, statusMessage: 'ZERO_AUTH_SECRET is not configured' })
-  }
+  const { authSecret } = useRuntimeConfig(event)
+  const secret = typeof authSecret === 'string' && authSecret ? authSecret : fallbackAuthSecret
 
   const jwt = await new SignJWT({
     sub: userIDs[randomInt(userIDs.length)],
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('30days')
-    .sign(new TextEncoder().encode(config.zero.authSecret))
+    .sign(new TextEncoder().encode(secret))
 
   setCookie(event, 'jwt', jwt, {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

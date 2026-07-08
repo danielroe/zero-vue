@@ -97,9 +97,15 @@ importers:
       '@vueuse/integrations':
         specifier: ^14.3.0
         version: 14.3.0(change-case@5.4.4)(fuse.js@7.4.2)(universal-cookie@8.1.2)(vue@3.5.39(typescript@6.0.3))
+      h3:
+        specifier: ^1.15.11
+        version: 1.15.11
       jose:
         specifier: ^6.2.3
         version: 6.2.3
+      postgres:
+        specifier: ^3.4.7
+        version: 3.4.7
       universal-cookie:
         specifier: ^8.1.2
         version: 8.1.2
