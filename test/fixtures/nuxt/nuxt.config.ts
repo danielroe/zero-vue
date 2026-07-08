@@ -24,6 +24,11 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-05-25',
   vite: {
+    resolve: {
+      alias: {
+        'zero-vue': fileURLToPath(new URL('../../../src/index.ts', import.meta.url)),
+      },
+    },
     optimizeDeps: {
       esbuildOptions: {
         target: 'es2022',
