@@ -1,10 +1,7 @@
-import { randomBytes, randomInt } from 'node:crypto'
+import { randomInt } from 'node:crypto'
 import process from 'node:process'
+import { createError } from 'h3'
 import { jwtVerify, SignJWT } from 'jose'
-
-const authSecret = new TextEncoder().encode(
-  process.env.VUE_AUTH_SECRET ?? randomBytes(32).toString('base64url'),
-)
 
 const userIDs = [
   '6z7dkeVLNm',
@@ -19,7 +16,12 @@ const userIDs = [
 ]
 
 function getAuthSecret() {
-  return authSecret
+  const authSecret = process.env.VITE_AUTH_SECRET
+  if (!authSecret) {
+    throw createError({ statusCode: 500, statusMessage: 'VITE_AUTH_SECRET is not configured' })
+  }
+
+  return new TextEncoder().encode(authSecret)
 }
 
 export async function createJWT() {

@@ -2,10 +2,11 @@ import process from 'node:process'
 import { mustGetMutator } from '@rocicorp/zero'
 import { handleMutateRequest } from '@rocicorp/zero/server'
 import { zeroPostgresJS } from '@rocicorp/zero/server/adapters/postgresjs'
+import { toWebRequest } from 'h3'
 import postgres from 'postgres'
 
 import { mutators, schema } from '#fx/db/schema'
-import { getUserID } from './auth'
+import { getUserID } from '../../utils/auth'
 
 function getUpstreamDB() {
   const upstreamDB = process.env.ZERO_UPSTREAM_DB
@@ -17,8 +18,8 @@ function getUpstreamDB() {
 
 const dbProvider = zeroPostgresJS(schema, postgres(getUpstreamDB()))
 
-export async function handleMutate(request: Request) {
-  const userID = await getUserID(request)
+export default defineEventHandler(async (event) => {
+  const userID = await getUserID(event)
   const ctx = { userID }
 
   return handleMutateRequest({
@@ -27,7 +28,7 @@ export async function handleMutate(request: Request) {
       const mutator = mustGetMutator(mutators, name)
       return mutator.fn({ tx, args, ctx })
     }),
-    request,
+    request: toWebRequest(event),
     userID,
   })
-}
+})

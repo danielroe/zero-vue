@@ -2,10 +2,9 @@ import { useCookies } from '@vueuse/integrations/useCookies'
 import { decodeJwt } from 'jose'
 import { createZeroComposables } from 'zero-vue'
 
-import { schema } from '../../_shared/db/schema'
-import { mutators } from './zero.shared'
+import { mutators, schema } from '#fx/db/schema'
 
-export { mutators, queries } from './zero.shared'
+export { mutators, queries } from '#fx/db/schema'
 
 const cookies = useCookies()
 
@@ -18,6 +17,8 @@ export const { useZero, useQuery } = createZeroComposables(() => {
     userID,
     context: { userID },
     cacheURL: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
+    queryURL: import.meta.env.VITE_PUBLIC_ZERO_QUERY_URL,
+    mutateURL: import.meta.env.VITE_PUBLIC_ZERO_MUTATE_URL,
     schema,
     mutators,
     // This is often easier to develop with if you're frequently changing

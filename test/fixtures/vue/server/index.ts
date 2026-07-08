@@ -13,7 +13,7 @@ router.get('/api/login', defineEventHandler(async (event) => {
   return 'ok'
 }))
 
-router.post('/api/query', defineEventHandler(event => handleQuery(toWebRequest(event))))
-router.post('/api/mutate', defineEventHandler(event => handleMutate(toWebRequest(event))))
+router.post('/api/zero/query', defineEventHandler(event => handleQuery(toWebRequest(event))))
+router.post('/api/zero/mutate', defineEventHandler(event => handleMutate(toWebRequest(event))))
 
 export const app = createApp().use(router)

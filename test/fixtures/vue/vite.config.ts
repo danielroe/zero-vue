@@ -26,7 +26,10 @@ export default defineConfig(({ mode }) => {
             }
 
             try {
-              listener ??= toNodeListener((await import('./server')).app)
+              if (!listener) {
+                const mod = await server.ssrLoadModule(fileURLToPath(new URL('./server/index.ts', import.meta.url))) as typeof import('./server')
+                listener = toNodeListener(mod.app)
+              }
               listener(req, res)
             }
             catch (error) {

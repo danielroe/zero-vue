@@ -1,11 +1,12 @@
 import { mustGetQuery } from '@rocicorp/zero'
 import { handleQueryRequest } from '@rocicorp/zero/server'
+import { toWebRequest } from 'h3'
 
 import { queries, schema } from '#fx/db/schema'
-import { getUserID } from './auth'
+import { getUserID } from '../../utils/auth'
 
-export async function handleQuery(request: Request) {
-  const userID = await getUserID(request)
+export default defineEventHandler(async (event) => {
+  const userID = await getUserID(event)
   const ctx = { userID }
 
   return handleQueryRequest({
@@ -14,7 +15,7 @@ export async function handleQuery(request: Request) {
       return query.fn({ args, ctx })
     },
     schema,
-    request,
+    request: toWebRequest(event),
     userID,
   })
-}
+})
