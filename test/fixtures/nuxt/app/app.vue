@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useInterval } from '#fx/composables/use-interval'
 import { randomMessage } from '#fx/db/data/test-data'
+import { mutators, queries } from '#fx/db/schema'
 import { formatDate } from '#fx/utils/date'
 import { randInt } from '#fx/utils/rand'
-import { mutators, queries } from '#fx/db/schema'
 
 const zero = useZero()
 const { data: users } = useQuery(() => queries.users.all())
