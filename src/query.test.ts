@@ -7,10 +7,12 @@ import {
   defineQueriesWithType,
   defineQuery,
   number,
+  relationships,
   string,
   table,
   Zero,
 } from '@rocicorp/zero'
+import { asQueryInternals } from '@rocicorp/zero/bindings'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import { nextTick, ref, watchEffect } from 'vue'
 import z from 'zod'
@@ -274,6 +276,83 @@ describe('useQuery', () => {
 
     expect(rowLog).toEqual([])
     // expect(resultDetailsLog).toEqual(["complete"]);
+  })
+
+  it('re-materializes when query format changes', async () => {
+    const { zero, useQuery } = await setupTestEnvironment()
+    const zql = createBuilder(schema)
+    const pluralQuery = zql.table.where('a', 1).limit(1)
+    const singularQuery = zql.table.where('a', 1).one()
+    expect(asQueryInternals(pluralQuery).hash()).toBe(asQueryInternals(singularQuery).hash())
+
+    const singular = ref(false)
+    const materializeSpy = vi.spyOn(zero.value, 'materialize')
+    const query = () => singular.value
+      ? singularQuery
+      : pluralQuery
+
+    useQuery(query as Parameters<typeof useQuery>[0])
+
+    expect(materializeSpy).toHaveBeenCalledTimes(1)
+
+    singular.value = true
+    await nextTick()
+
+    expect(materializeSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('re-materializes when nested query format changes', async () => {
+    const issue = table('issue')
+      .columns({ id: string() })
+      .primaryKey('id')
+    const comment = table('comment')
+      .columns({ id: string(), issueID: string() })
+      .primaryKey('id')
+    const nestedSchema = createSchema({
+      tables: [issue, comment],
+      relationships: [
+        relationships(issue, ({ many }) => ({
+          comments: many({
+            sourceField: ['id'],
+            destField: ['issueID'],
+            destSchema: comment,
+          }),
+        })),
+      ],
+    })
+    const zero = new Zero({
+      userID: 'test-user',
+      server: null,
+      schema: nestedSchema,
+      kvStore: 'mem' as const,
+    })
+    const zql = createBuilder(nestedSchema)
+    const pluralQuery = zql.issue
+      .where('id', 'i1')
+      .related('comments', q => q.limit(1))
+    const singularQuery = zql.issue
+      .where('id', 'i1')
+      .related('comments', q => q.one())
+    expect(asQueryInternals(pluralQuery).hash()).toBe(asQueryInternals(singularQuery).hash())
+
+    onTestFinished(async () => {
+      await zero.close()
+    })
+
+    const singular = ref(false)
+    const materializeSpy = vi.spyOn(zero, 'materialize')
+    const query = () => singular.value
+      ? singularQuery
+      : pluralQuery
+
+    useQuery(zero, query as never)
+
+    expect(materializeSpy).toHaveBeenCalledTimes(1)
+
+    singular.value = true
+    await nextTick()
+
+    expect(materializeSpy).toHaveBeenCalledTimes(2)
   })
 
   it('useQuery deps change watchEffect', async () => {
