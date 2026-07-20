@@ -4,12 +4,22 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "#fx/*": [
+        "../_shared/*"
+      ]
+    },
     "types": [
       "node"
     ],
     "noEmit": true
   },
   "include": [
+    "server/**/*",
+    "../_shared/**/*",
     "vite.config.*",
     "vitest.config.*",
     "cypress.config.*",

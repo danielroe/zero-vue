@@ -8,7 +8,7 @@ const authSecret = 'test-secret-for-e2e'
 await setup({
   rootDir: fileURLToPath(new URL('..', import.meta.url)),
   env: {
-    NUXT_ZERO_AUTH_SECRET: authSecret,
+    NUXT_AUTH_SECRET: authSecret,
   },
 })
 
