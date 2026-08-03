@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useInterval } from '#fx/composables/use-interval'
 import { randomMessage } from '#fx/db/data/test-data'
+import { mutators, queries } from '#fx/db/schema'
 import { formatDate } from '#fx/utils/date'
 import { randInt } from '#fx/utils/rand'
-import { mutators, queries } from '~/composables/zero'
 
 const zero = useZero()
 const { data: users } = useQuery(() => queries.users.all())
@@ -20,6 +20,7 @@ const { data: filteredMessages } = useQuery(() => queries.messages.filtered({
 }))
 
 const hasFilters = computed(() => filterUser.value || filterText.value)
+const canAddMessages = computed(() => !!zero.value.userID && users.value.length > 0 && mediums.value.length > 0)
 
 function deleteRandomMessage() {
   if (allMessages.value.length === 0) {
@@ -32,6 +33,10 @@ function deleteRandomMessage() {
 }
 
 function addRandomMessage() {
+  if (!canAddMessages.value) {
+    return false
+  }
+
   zero.value.mutate(mutators.message.insert(
     randomMessage(users.value, mediums.value),
   ))
@@ -68,7 +73,7 @@ function handleAddAction() {
 }
 
 function handleRemoveAction(e: MouseEvent | TouchEvent) {
-  if (zero.value.userID === 'anon' && 'shiftKey' in e && !e.shiftKey) {
+  if (!zero.value.userID && 'shiftKey' in e && !e.shiftKey) {
     // eslint-disable-next-line no-alert
     alert('You must be logged in to delete. Hold shift to try anyway.')
     return
@@ -106,7 +111,7 @@ function editMessage(e: MouseEvent, id: string, senderID: string, prev: string) 
 
 const jwt = useCookie('jwt')
 async function toggleLogin() {
-  if (zero.value.userID === 'anon') {
+  if (!zero.value.userID) {
     await $fetch('/api/login')
   }
   else {
@@ -115,7 +120,7 @@ async function toggleLogin() {
   location.reload()
 }
 
-const user = computed(() => users.value.find(user => user.id === zero.value.userID)?.name ?? 'anon')
+const user = computed(() => users.value.find(user => user.id === zero.value.userID)?.name)
 </script>
 
 <template>
@@ -123,6 +128,7 @@ const user = computed(() => users.value.find(user => user.id === zero.value.user
     <div class="controls">
       <div>
         <button
+          :disabled="!canAddMessages"
           @mousedown="handleAddAction"
           @mouseup="stopAction"
           @mouseleave="stopAction"
@@ -143,9 +149,9 @@ const user = computed(() => users.value.find(user => user.id === zero.value.user
         <em>(hold down buttons to repeat)</em>
       </div>
       <div :style="{ justifyContent: 'end' }">
-        {{ user === 'anon' ? '' : `Logged in as ${user}` }}
+        {{ user ? `Logged in as ${user}` : '' }}
         <button @mousedown="toggleLogin">
-          {{ user === 'anon' ? 'Login' : 'Logout' }}
+          {{ user ? 'Logout' : 'Login' }}
         </button>
       </div>
     </div>
