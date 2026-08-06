@@ -16,37 +16,37 @@ importers:
         version: 1.6.2(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))
     devDependencies:
       '@antfu/eslint-config':
-        specifier: latest
+        specifier: ^9.1.0
         version: 9.1.0(@typescript-eslint/rule-tester@8.60.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.62.1(typescript@6.0.3))(@typescript-eslint/utils@8.62.1(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.39)(eslint@10.6.0(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.10)
       '@rocicorp/resolver':
         specifier: 1.0.2
         version: 1.0.2
       '@vitest/coverage-v8':
-        specifier: latest
+        specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       eslint:
-        specifier: latest
+        specifier: ^10.6.0
         version: 10.6.0(jiti@2.7.0)
       installed-check:
-        specifier: latest
+        specifier: ^10.0.1
         version: 10.0.1
       knip:
-        specifier: latest
+        specifier: ^6.24.0
         version: 6.24.0
       nano-staged:
         specifier: 1.0.2
         version: 1.0.2
       simple-git-hooks:
-        specifier: latest
+        specifier: ^2.13.1
         version: 2.13.1
       tsdown:
         specifier: 0.22.3
         version: 0.22.3(oxc-resolver@11.21.3)(tsx@4.22.4)(typescript@6.0.3)(vue-tsc@3.2.8(typescript@6.0.3))
       typescript:
-        specifier: latest
+        specifier: ^6.0.3
         version: 6.0.3
       vitest:
-        specifier: latest
+        specifier: ^4.1.10
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@25.9.3)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.2)(vite@8.0.14(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
       vue:
         specifier: 3.5.39
