@@ -37,16 +37,16 @@
     "@rocicorp/zero": "^1.4.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.1.0",
+    "@antfu/eslint-config": "9.1.0",
     "@rocicorp/resolver": "1.0.2",
     "@vitest/coverage-v8": "4.1.10",
     "eslint": "10.6.0",
-    "installed-check": "^10.0.1",
+    "installed-check": "10.0.1",
     "knip": "6.24.0",
     "nano-staged": "1.0.2",
-    "simple-git-hooks": "^2.13.1",
+    "simple-git-hooks": "2.13.1",
     "tsdown": "0.22.3",
-    "typescript": "^6.0.3",
+    "typescript": "6.0.3",
     "vitest": "4.1.10",
     "vue": "3.5.41",
     "zod": "4.4.3"
