@@ -25,13 +25,13 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       eslint:
-        specifier: ^10.6.0
+        specifier: 10.6.0
         version: 10.6.0(jiti@2.7.0)
       installed-check:
         specifier: ^10.0.1
         version: 10.0.1
       knip:
-        specifier: ^6.24.0
+        specifier: 6.24.0
         version: 6.24.0
       nano-staged:
         specifier: 1.0.2
