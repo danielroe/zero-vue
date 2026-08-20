@@ -1,18 +1,49 @@
+import process from 'node:process'
 import { fileURLToPath, URL } from 'node:url'
 
 import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
+import { toNodeListener } from 'h3'
+import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-  ],
-  resolve: {
-    alias: {
-      '~': fileURLToPath(new URL('./src', import.meta.url)),
-      '#fx': fileURLToPath(new URL('../_shared', import.meta.url)),
-      'zero-vue': fileURLToPath(new URL('../../../src/index.ts', import.meta.url).href),
+export default defineConfig(({ mode }) => {
+  Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
+
+  return {
+    server: {
+      port: 3000,
     },
-  },
+    plugins: [
+      vue(),
+      {
+        name: 'fixture-server',
+        configureServer(server) {
+          let listener: ReturnType<typeof toNodeListener> | undefined
+
+          server.middlewares.use(async (req, res, next) => {
+            if (!req.url?.startsWith('/api')) {
+              return next()
+            }
+
+            try {
+              if (!listener) {
+                const mod = await server.ssrLoadModule(fileURLToPath(new URL('./server/index.ts', import.meta.url))) as typeof import('./server')
+                listener = toNodeListener(mod.app)
+              }
+              listener(req, res)
+            }
+            catch (error) {
+              next(error)
+            }
+          })
+        },
+      },
+    ],
+    resolve: {
+      alias: {
+        '~': fileURLToPath(new URL('./src', import.meta.url)),
+        '#fx': fileURLToPath(new URL('../_shared', import.meta.url)),
+      },
+    },
+  }
 })

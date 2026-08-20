@@ -1,3 +1,5 @@
+name: zero-vue
+
 services:
   zstart_postgres:
     image: postgres:18.3-alpine
@@ -23,7 +25,7 @@ services:
       -c hot_standby=on
       -c hot_standby_feedback=on
     volumes:
-      - zstart_pgdata:/var/lib/postgresql/data
+      - zstart_pgdata:/var/lib/postgresql
       - ./:/docker-entrypoint-initdb.d
 
 volumes:

@@ -104,7 +104,7 @@ export function useQuery<
   )
 
   const qi = computed(() => q.value ? asQueryInternals(q.value) : undefined)
-  const hash = computed(() => qi.value?.hash())
+  const hash = computed(() => qi.value ? qi.value.hash() + JSON.stringify(qi.value.format) : undefined)
 
   watch(
     [
