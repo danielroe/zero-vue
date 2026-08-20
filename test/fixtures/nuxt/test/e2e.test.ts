@@ -2,27 +2,16 @@ import { fileURLToPath } from 'node:url'
 import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
 import { jwtVerify } from 'jose'
 import { describe, expect, it } from 'vitest'
+import { seededUserIDs } from '../../_shared/db/data/seeded-users'
 
 const authSecret = 'test-secret-for-e2e'
 
 await setup({
   rootDir: fileURLToPath(new URL('..', import.meta.url)),
   env: {
-    NUXT_ZERO_AUTH_SECRET: authSecret,
+    NUXT_AUTH_SECRET: authSecret,
   },
 })
-
-const seededUserIDs = new Set([
-  '6z7dkeVLNm',
-  'ycD76wW4R2',
-  'IoQSaxeVO5',
-  'WndZWmGkO4',
-  'ENzoNm7g4E',
-  'dLKecN3ntd',
-  '7VoEoJWEwn',
-  'enVvyDlBul',
-  '9ogaDuDNFx',
-])
 
 describe('nuxt fixture', () => {
   it('renders the SSR page without a jwt cookie', async () => {
@@ -44,7 +33,7 @@ describe('nuxt fixture', () => {
     const jwt = jwtCookie!.split(';')[0]!.slice('jwt='.length)
     const { payload } = await jwtVerify(jwt, new TextEncoder().encode(authSecret))
     expect(typeof payload.sub).toBe('string')
-    expect(seededUserIDs.has(payload.sub as string)).toBe(true)
+    expect(seededUserIDs).toContain(payload.sub)
   })
 
   it('renders without crashing when a jwt cookie is present on SSR', async () => {

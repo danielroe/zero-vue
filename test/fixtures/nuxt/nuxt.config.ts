@@ -13,12 +13,12 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/index.css'],
   runtimeConfig: {
-    zero: {
-      authSecret: '',
-    },
+    authSecret: '',
     public: {
       zero: {
         cacheURL: '',
+        queryURL: '',
+        mutateURL: '',
       },
     },
   },
@@ -28,7 +28,12 @@ export default defineNuxtConfig({
       esbuildOptions: {
         target: 'es2022',
       },
-      include: ['@rocicorp/zero'],
+      include: [
+        '@rocicorp/zero',
+        '@rocicorp/zero/bindings',
+        'jose',
+        'zod',
+      ],
     },
   },
 })
