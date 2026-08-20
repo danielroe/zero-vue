@@ -123,6 +123,7 @@ async function toggleLogin() {
   else {
     cookies.remove('jwt')
   }
+  location.reload()
 }
 
 const user = computed(() => users.value.find(user => user.id === zero.value.userID)?.name)
