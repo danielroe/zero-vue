@@ -6,8 +6,8 @@ import { formatDate } from '#fx/utils/date'
 import { randInt } from '#fx/utils/rand'
 
 const zero = useZero()
-const { data: users } = useQuery(() => queries.users.all())
-const { data: mediums } = useQuery(() => queries.mediums.all())
+const { data: users } = await useZeroSsrQuery<{ id: string, name: string, partner: boolean }>('users', () => queries.users.all())
+const { data: mediums } = await useZeroSsrQuery<{ id: string, name: string }>('mediums', () => queries.mediums.all())
 const { data: allMessages } = useQuery(() => queries.messages.all())
 
 const filterUser = ref('')

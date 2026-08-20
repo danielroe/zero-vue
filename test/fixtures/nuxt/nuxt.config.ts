@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     authSecret: '',
     public: {
       zero: {
+        ssr: false,
         cacheURL: '',
         queryURL: '',
         mutateURL: '',

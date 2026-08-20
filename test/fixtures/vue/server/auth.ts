@@ -25,17 +25,20 @@ export async function createJWT() {
 }
 
 export async function getUserID(request: Request) {
+  const authHeader = request.headers.get('authorization')
   const cookie = request.headers
     .get('cookie')
     ?.split(';')
     .map(cookie => cookie.trim())
     .find(cookie => cookie.startsWith('jwt='))
 
-  if (!cookie) {
+  const jwt = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice('Bearer '.length)
+    : cookie?.slice('jwt='.length)
+
+  if (!jwt) {
     return undefined
   }
-
-  const jwt = cookie.slice('jwt='.length)
   try {
     const { payload } = await jwtVerify(jwt, getAuthSecret())
     return typeof payload.sub === 'string' ? payload.sub : undefined

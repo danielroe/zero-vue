@@ -1,5 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": [
+    "test/e2e/**"
+  ],
+  "ignoreDependencies": [
+    "pg",
+    "@types/pg"
+  ],
   "ignoreWorkspaces": [
     "test/fixtures/*"
   ]

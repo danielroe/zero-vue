@@ -12,6 +12,7 @@ import {
   createSchema,
   defineMutator,
   defineMutators,
+  definePermissions,
   defineQueries,
   defineQuery,
   escapeLike,
@@ -77,6 +78,11 @@ declare module '@rocicorp/zero' {
     schema: typeof schema
   }
 }
+
+// The fixtures only use synced queries and custom mutators, so no table-level
+// permissions are granted. Deploying the empty set (rather than omitting the
+// export) keeps zero-cache from warning that no permissions were found.
+export const permissions = definePermissions<unknown, Schema>(schema, () => ({}))
 
 export const zql = createBuilder(schema)
 

@@ -66,6 +66,81 @@ const { data: users } = useQuery(() => zero.value.query.user)
 > [!TIP]
 > See [the Vue fixture](./test/fixtures/vue) or [the Nuxt fixture](./test/fixtures/nuxt) for full working examples based on [rocicorp/hello-zero](https://github.com/rocicorp/hello-zero).
 
+## SSR
+
+Zero is designed for the browser: it opens a WebSocket to `zero-cache`, keeps a local replica in IndexedDB or in-memory, and exposes a reactive view. None of that is straightforward with server-rendering, so there are a few pain points to be aware of today when wiring `zero-vue` into an SSR framework like Nuxt. A dedicated `zero-vue/nuxt` module is planned to handle these automatically; until then, [the Nuxt fixture](./test/fixtures/nuxt) might be a useful guide.
+
+**Scope `createZeroComposables` per request.** The composables returned by `createZeroComposables` close over a single `Zero` instance. If you call it at module scope, every SSR request will share that instance (and its `userID`, its local data, and its WebSocket). Cache the composables on `useNuxtApp()` instead, and close the instance once the response has rendered:
+
+```ts
+function createComposables() {
+  return createZeroComposables(() => ({
+    userID,
+    cacheURL: useRuntimeConfig().public.zero.cacheURL || undefined,
+    schema,
+    mutators,
+    kvStore: 'mem',
+  }))
+}
+
+declare module '#app' {
+  interface NuxtApp {
+    _zeroComposables?: ReturnType<typeof createComposables>
+  }
+}
+
+function getZeroComposables() {
+  const nuxt = useNuxtApp()
+  if (!nuxt._zeroComposables) {
+    nuxt._zeroComposables = createComposables()
+    if (import.meta.server) {
+      nuxt.hooks.hookOnce('app:rendered', () => {
+        const zero = nuxt._zeroComposables?.useZero().value
+        if (zero && !zero.closed) {
+          void zero.close()
+        }
+      })
+    }
+  }
+  return nuxt._zeroComposables
+}
+```
+
+**`useQuery` will not have data ready during render.** `useQuery` returns a reactive view that fills in once the underlying query has synced from `zero-cache`. The first synchronous render (which is what SSR uses) sees an empty array. If you want SSR-rendered data, return a `useAsyncData` fetch of `zero.run(query, { type: 'complete' })` and hand `data` over to the live view once it has synced on the client:
+
+```ts
+export function useZeroSsrQuery(key, query) {
+  const zero = useZero()
+  const { data: liveRows, status } = useQuery(query)
+
+  const asyncData = useAsyncData(`zero:${key}`, async () => {
+    if (!zero.value.server) {
+      return []
+    }
+    return await zero.value.run(query, { type: 'complete' })
+  }, {
+    default: () => [],
+    // Zero rows carry a symbol-keyed refcount property that the Nuxt payload
+    // serialiser rejects; strip it before it is serialised.
+    transform: rows => JSON.parse(JSON.stringify(rows)),
+  })
+
+  if (import.meta.client) {
+    watch([liveRows, status], ([rows, status]) => {
+      if (status === 'complete') {
+        asyncData.data.value = rows
+      }
+    }, { immediate: true })
+  }
+
+  return asyncData
+}
+
+const { data: users } = await useZeroSsrQuery('users', () => queries.users.all())
+```
+
+**Leave `cacheURL` unset if you don't want a server-side WebSocket.** Zero detects the absence of `WebSocket` in the global scope and skips the connect loop, so older Node runtimes are fine. Node 22+ exposes a real `WebSocket` global, so `new Zero({ cacheURL: 'http://...' })` will happily try to connect from the server. Leave `cacheURL` unset on environments where the server shouldn't pre-fetch via Zero (and close the instance after render if you do set it, as above).
+
 ## 💻 Development
 
 - Clone this repository

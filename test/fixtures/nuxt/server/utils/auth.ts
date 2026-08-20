@@ -25,7 +25,10 @@ export async function createJWT(event: H3Event) {
 }
 
 export async function getUserID(event: H3Event) {
-  const jwt = getCookie(event, 'jwt')
+  const authHeader = getHeader(event, 'authorization')
+  const jwt = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice('Bearer '.length)
+    : getCookie(event, 'jwt')
   if (!jwt) {
     return undefined
   }
