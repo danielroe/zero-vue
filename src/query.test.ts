@@ -291,14 +291,16 @@ describe('useQuery', () => {
       ? singularQuery
       : pluralQuery
 
-    useQuery(query as Parameters<typeof useQuery>[0])
+    const { data } = useQuery(query as Parameters<typeof useQuery>[0])
 
     expect(materializeSpy).toHaveBeenCalledTimes(1)
+    expect(data.value).toMatchObject([{ a: 1, b: 'a' }])
 
     singular.value = true
     await nextTick()
 
     expect(materializeSpy).toHaveBeenCalledTimes(2)
+    expect(data.value).toMatchObject({ a: 1, b: 'a' })
   })
 
   it('re-materializes when nested query format changes', async () => {
