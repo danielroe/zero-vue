@@ -12,8 +12,11 @@ function createComposables() {
 
     return {
       userID,
+      auth: jwt.value || undefined,
       context: { userID },
-      cacheURL: import.meta.client ? config.public.zero.cacheURL : undefined,
+      cacheURL: (import.meta.client || config.public.zero.ssr)
+        ? config.public.zero.cacheURL || undefined
+        : undefined,
       queryURL: config.public.zero.queryURL,
       mutateURL: config.public.zero.mutateURL,
       schema,
@@ -33,7 +36,17 @@ declare module '#app' {
 
 function getZeroComposables(): ZeroComposables {
   const nuxt = useNuxtApp()
-  nuxt._zeroComposables ??= createComposables()
+  if (!nuxt._zeroComposables) {
+    nuxt._zeroComposables = createComposables()
+    if (import.meta.server) {
+      nuxt.hooks.hookOnce('app:rendered', () => {
+        const zero = nuxt._zeroComposables?.useZero().value
+        if (zero && !zero.closed) {
+          void zero.close()
+        }
+      })
+    }
+  }
   return nuxt._zeroComposables
 }
 

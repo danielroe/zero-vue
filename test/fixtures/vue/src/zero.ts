@@ -15,6 +15,7 @@ export const { useZero, useQuery } = createZeroComposables(() => {
 
   return {
     userID,
+    auth: encodedJWT || undefined,
     context: { userID },
     cacheURL: import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL,
     queryURL: import.meta.env.VITE_PUBLIC_ZERO_QUERY_URL,
