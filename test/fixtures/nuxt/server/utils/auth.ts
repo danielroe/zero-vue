@@ -41,6 +41,11 @@ export async function getUserID(event: H3Event) {
     return undefined
   }
 
-  const { payload } = await jwtVerify(jwt, getAuthSecret(event))
-  return typeof payload.sub === 'string' ? payload.sub : undefined
+  try {
+    const { payload } = await jwtVerify(jwt, getAuthSecret(event))
+    return typeof payload.sub === 'string' ? payload.sub : undefined
+  }
+  catch {
+    return undefined
+  }
 }

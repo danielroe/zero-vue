@@ -46,6 +46,11 @@ export async function getUserID(request: Request) {
   }
 
   const jwt = cookie.slice('jwt='.length)
-  const { payload } = await jwtVerify(jwt, getAuthSecret())
-  return typeof payload.sub === 'string' ? payload.sub : undefined
+  try {
+    const { payload } = await jwtVerify(jwt, getAuthSecret())
+    return typeof payload.sub === 'string' ? payload.sub : undefined
+  }
+  catch {
+    return undefined
+  }
 }
