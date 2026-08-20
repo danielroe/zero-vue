@@ -17,9 +17,9 @@ import type {
   TTL,
 } from '@rocicorp/zero'
 import type { ViewChange } from '@rocicorp/zero/bindings'
-import type { Ref } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 import { applyChange, skipYields } from '@rocicorp/zero/bindings'
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 
 export type QueryStatus = QueryResultDetails['type']
 export type QueryError = QueryErrorDetails['error']
@@ -30,10 +30,12 @@ export class VueView implements Output {
   readonly #onDestroy: () => void
   readonly #updateTTL: (ttl: TTL) => void
 
-  #data: Ref<Entry>
+  #root: Entry
+  #data: ShallowRef<Entry>
   #status: Ref<QueryStatus>
   #error: Ref<QueryError | undefined>
   #isDestroyed = false
+  #txnDirty = new WeakSet<object>()
 
   constructor(
     input: Input,
@@ -47,15 +49,20 @@ export class VueView implements Output {
     this.#format = format
     this.#onDestroy = onDestroy
     this.#updateTTL = updateTTL
-    this.#data = ref({ '': format.singular ? undefined : [] })
+    this.#root = { '': format.singular ? undefined : [] }
+    this.#data = shallowRef(this.#root)
     this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
     this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryError | undefined>
 
     input.setOutput(this)
 
     for (const node of skipYields(input.fetch({}))) {
-      this.#applyChange({ type: 'add', node })
+      this.#applyChange({ type: 'add', node }, true)
     }
+
+    this.#data.value = this.#root
+
+    onTransactionCommit(() => this.#flush())
 
     if (queryComplete !== true && !('error' in queryComplete)) {
       void queryComplete.then(() => {
@@ -87,13 +94,15 @@ export class VueView implements Output {
     }
   }
 
-  #applyChange(change: ViewChange): void {
-    applyChange(
-      this.#data.value,
+  #applyChange(change: ViewChange, mutate: boolean | WeakSet<object> = this.#txnDirty): void {
+    this.#root = applyChange(
+      this.#root,
       change,
       this.#input.getSchema(),
       '',
       this.#format,
+      false,
+      mutate,
     )
   }
 
@@ -104,6 +113,11 @@ export class VueView implements Output {
 
   updateTTL(ttl: TTL): void {
     this.#updateTTL(ttl)
+  }
+
+  #flush(): void {
+    this.#txnDirty = new WeakSet<object>()
+    this.#data.value = this.#root
   }
 }
 
