@@ -8,22 +8,25 @@ import postgres from 'postgres'
 import { mutators, schema } from '#fx/db/schema'
 import { getUserID } from '../../utils/auth'
 
-function getUpstreamDB() {
-  const upstreamDB = process.env.ZERO_UPSTREAM_DB
-  if (!upstreamDB) {
-    throw new Error('ZERO_UPSTREAM_DB is not configured')
-  }
-  return upstreamDB
-}
+let dbProvider: ReturnType<typeof zeroPostgresJS> | undefined
 
-const dbProvider = zeroPostgresJS(schema, postgres(getUpstreamDB()))
+function getDBProvider() {
+  if (!dbProvider) {
+    const upstreamDB = process.env.ZERO_UPSTREAM_DB
+    if (!upstreamDB) {
+      throw new Error('ZERO_UPSTREAM_DB is not configured')
+    }
+    dbProvider = zeroPostgresJS(schema, postgres(upstreamDB))
+  }
+  return dbProvider
+}
 
 export default defineEventHandler(async (event) => {
   const userID = await getUserID(event)
   const ctx = { userID }
 
   return handleMutateRequest({
-    dbProvider,
+    dbProvider: getDBProvider(),
     handler: transact => transact((tx, name, args) => {
       const mutator = mustGetMutator(mutators, name)
       return mutator.fn({ tx, args, ctx })
