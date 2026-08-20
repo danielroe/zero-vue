@@ -30,6 +30,7 @@ export class VueView implements Output {
   readonly #onDestroy: () => void
   readonly #updateTTL: (ttl: TTL) => void
 
+  #root: Entry
   #data: ShallowRef<Entry>
   #status: Ref<QueryStatus>
   #error: Ref<QueryError | undefined>
@@ -48,7 +49,8 @@ export class VueView implements Output {
     this.#format = format
     this.#onDestroy = onDestroy
     this.#updateTTL = updateTTL
-    this.#data = shallowRef({ '': format.singular ? undefined : [] })
+    this.#root = { '': format.singular ? undefined : [] }
+    this.#data = shallowRef(this.#root)
     this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
     this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryError | undefined>
 
@@ -58,7 +60,9 @@ export class VueView implements Output {
       this.#applyChange({ type: 'add', node }, true)
     }
 
-    onTransactionCommit(() => this.flush())
+    this.#data.value = this.#root
+
+    onTransactionCommit(() => this.#flush())
 
     if (queryComplete !== true && !('error' in queryComplete)) {
       void queryComplete.then(() => {
@@ -91,8 +95,8 @@ export class VueView implements Output {
   }
 
   #applyChange(change: ViewChange, mutate: boolean | WeakSet<object> = this.#txnDirty): void {
-    this.#data.value = applyChange(
-      this.#data.value,
+    this.#root = applyChange(
+      this.#root,
       change,
       this.#input.getSchema(),
       '',
@@ -111,8 +115,9 @@ export class VueView implements Output {
     this.#updateTTL(ttl)
   }
 
-  flush(): void {
+  #flush(): void {
     this.#txnDirty = new WeakSet<object>()
+    this.#data.value = this.#root
   }
 }
 
