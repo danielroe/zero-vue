@@ -3,18 +3,7 @@ import { randomInt } from 'node:crypto'
 import { createError, getCookie } from 'h3'
 import { jwtVerify, SignJWT } from 'jose'
 
-// See docker/seed.sql for the seeded user list.
-const userIDs = [
-  '6z7dkeVLNm',
-  'ycD76wW4R2',
-  'IoQSaxeVO5',
-  'WndZWmGkO4',
-  'ENzoNm7g4E',
-  'dLKecN3ntd',
-  '7VoEoJWEwn',
-  'enVvyDlBul',
-  '9ogaDuDNFx',
-]
+import { seededUserIDs } from '#fx/db/data/seeded-users'
 
 function getAuthSecret(event: H3Event) {
   const config = useRuntimeConfig(event)
@@ -27,7 +16,7 @@ function getAuthSecret(event: H3Event) {
 
 export async function createJWT(event: H3Event) {
   return await new SignJWT({
-    sub: userIDs[randomInt(userIDs.length)]!,
+    sub: seededUserIDs[randomInt(seededUserIDs.length)]!,
     iat: Math.floor(Date.now() / 1000),
   })
     .setProtectedHeader({ alg: 'HS256' })

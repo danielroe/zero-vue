@@ -3,17 +3,7 @@ import process from 'node:process'
 import { createError } from 'h3'
 import { jwtVerify, SignJWT } from 'jose'
 
-const userIDs = [
-  '6z7dkeVLNm',
-  'ycD76wW4R2',
-  'IoQSaxeVO5',
-  'WndZWmGkO4',
-  'ENzoNm7g4E',
-  'dLKecN3ntd',
-  '7VoEoJWEwn',
-  'enVvyDlBul',
-  '9ogaDuDNFx',
-]
+import { seededUserIDs } from '#fx/db/data/seeded-users'
 
 function getAuthSecret() {
   const authSecret = process.env.VITE_AUTH_SECRET
@@ -26,7 +16,7 @@ function getAuthSecret() {
 
 export async function createJWT() {
   return await new SignJWT({
-    sub: userIDs[randomInt(userIDs.length)]!,
+    sub: seededUserIDs[randomInt(seededUserIDs.length)]!,
     iat: Math.floor(Date.now() / 1000),
   })
     .setProtectedHeader({ alg: 'HS256' })
