@@ -8,16 +8,18 @@ import postgres from 'postgres'
 import { mutators, schema } from '#fx/db/schema'
 import { getUserID } from '../../utils/auth'
 
-let dbProvider: ReturnType<typeof zeroPostgresJS> | undefined
+function createDBProvider() {
+  const upstreamDB = process.env.ZERO_UPSTREAM_DB
+  if (!upstreamDB) {
+    throw new Error('ZERO_UPSTREAM_DB is not configured')
+  }
+  return zeroPostgresJS(schema, postgres(upstreamDB))
+}
+
+let dbProvider: ReturnType<typeof createDBProvider> | undefined
 
 function getDBProvider() {
-  if (!dbProvider) {
-    const upstreamDB = process.env.ZERO_UPSTREAM_DB
-    if (!upstreamDB) {
-      throw new Error('ZERO_UPSTREAM_DB is not configured')
-    }
-    dbProvider = zeroPostgresJS(schema, postgres(upstreamDB))
-  }
+  dbProvider ??= createDBProvider()
   return dbProvider
 }
 
