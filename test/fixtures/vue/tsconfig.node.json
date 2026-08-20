@@ -19,6 +19,7 @@
   },
   "include": [
     "server/**/*",
+    "test/**/*",
     "../_shared/**/*",
     "vite.config.*",
     "vitest.config.*",
