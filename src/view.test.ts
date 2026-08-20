@@ -16,7 +16,7 @@ import {
 } from '@rocicorp/zero'
 import { addContextToQuery } from '@rocicorp/zero/bindings'
 import { assert, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, watch } from 'vue'
 import z from 'zod'
 import { VueView, vueViewFactory } from './view'
 
@@ -51,6 +51,13 @@ function setupSimple() {
       z.object({ a: z.number() }),
       async ({ tx, args: { a } }) => {
         return tx.mutate.table.delete({ a })
+      },
+    ),
+    insertTwo: defineMutator(
+      z.object({ a1: z.number(), a2: z.number() }),
+      async ({ tx, args: { a1, a2 } }) => {
+        await tx.mutate.table.insert({ a: a1, b: 'x' })
+        await tx.mutate.table.insert({ a: a2, b: 'y' })
       },
     ),
   })
@@ -233,6 +240,15 @@ function makeChildChange(node: Node, child: { relationshipName: string, change: 
   return [3, node, child]
 }
 
+function manualCommitFactory() {
+  let commit = () => {}
+  const factory: typeof vueViewFactory = (query, input, format, onDestroy, _onTransactionCommit, queryComplete, updateTTL) =>
+    vueViewFactory(query, input, format, onDestroy, (cb) => {
+      commit = cb
+    }, queryComplete, updateTTL)
+  return { factory, commit: () => commit() }
+}
+
 describe('vueView', () => {
   it('basics', async () => {
     const { zero, mutators, tableQuery } = setupSimple()
@@ -327,6 +343,43 @@ describe('vueView', () => {
     const view = zero.materialize(tableQuery, vueViewFactory)
 
     expect(view.data).toEqual([])
+  })
+
+  it('preserves identity of unchanged rows across transactions', async () => {
+    const { zero, mutators, tableQuery } = setupSimple()
+
+    await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
+    await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
+
+    const view = zero.materialize(tableQuery, vueViewFactory)
+
+    const before = view.data
+    assert(Array.isArray(before))
+    const [row1, row2] = before
+
+    await zero.mutate(mutators.update({ a: 2, b: 'c' })).client
+
+    const after = view.data
+    assert(Array.isArray(after))
+    expect(after).not.toBe(before)
+    expect(after[0]).toBe(row1)
+    expect(after[1]).not.toBe(row2)
+  })
+
+  it('notifies sync watchers with final state at transaction commit', async () => {
+    const { zero, mutators, tableQuery } = setupSimple()
+
+    const view = zero.materialize(tableQuery, vueViewFactory)
+
+    const seen: number[] = []
+    watch(() => view.data, (data) => {
+      assert(Array.isArray(data))
+      seen.push(data.length)
+    }, { flush: 'sync' })
+
+    await zero.mutate(mutators.insertTwo({ a1: 1, a2: 2 })).client
+
+    expect(seen.at(-1)).toBe(2)
   })
 
   it('tree', async () => {
@@ -643,7 +696,12 @@ describe('vueView', () => {
   it('collapse', async () => {
     const { zero, issuesWithLabelsQuery } = setupCollapse()
 
-    const view = zero.materialize(issuesWithLabelsQuery, vueViewFactory)
+    const { factory, commit } = manualCommitFactory()
+    const view = zero.materialize(issuesWithLabelsQuery, factory)
+    const push = (change: Change) => {
+      view.push(change)
+      commit()
+    }
 
     expect(view.data).toEqual([])
 
@@ -679,7 +737,7 @@ describe('vueView', () => {
       },
     } as const
 
-    view.push(makeAddChange(changeSansType.node))
+    push(makeAddChange(changeSansType.node))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
@@ -698,12 +756,12 @@ describe('vueView', () => {
     ]
   `)
 
-    view.push(makeRemoveChange(changeSansType.node))
+    push(makeRemoveChange(changeSansType.node))
     expect(view.data).toEqual([])
 
-    view.push(makeAddChange(changeSansType.node))
+    push(makeAddChange(changeSansType.node))
 
-    view.push(makeChildChange(
+    push(makeChildChange(
       {
         row: {
           id: 1,
@@ -799,7 +857,7 @@ describe('vueView', () => {
   `)
 
     // edit the hidden row
-    view.push(makeChildChange(
+    push(makeChildChange(
       {
         row: {
           id: 1,
@@ -916,7 +974,7 @@ describe('vueView', () => {
   `)
 
     // edit the leaf
-    view.push(makeChildChange(
+    push(makeChildChange(
       {
         row: {
           id: 1,
@@ -1035,7 +1093,12 @@ describe('vueView', () => {
 
   it('collapse-single', async () => {
     const { zero, issuesWithLabelsQuery } = setupCollapse()
-    const view = zero.materialize(issuesWithLabelsQuery, vueViewFactory)
+    const { factory, commit } = manualCommitFactory()
+    const view = zero.materialize(issuesWithLabelsQuery, factory)
+    const push = (change: Change) => {
+      view.push(change)
+      commit()
+    }
 
     expect(view.data).toEqual([])
 
@@ -1069,7 +1132,7 @@ describe('vueView', () => {
         },
       },
     } as const
-    view.push(makeAddChange(changeSansType.node))
+    push(makeAddChange(changeSansType.node))
 
     expect(view.data).toMatchInlineSnapshot(`
     [
