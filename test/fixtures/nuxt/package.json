@@ -12,9 +12,8 @@
     "dev:clean": "cd ../_shared && source .env && docker volume rm -f zero-vue_zstart_pgdata && rm -rf \"${ZERO_REPLICA_FILE}\"*",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "test:e2e": "vitest run",
-    "test:types": "vue-tsc -b --noEmit"
+    "test:e2e": "nuxt prepare && vitest run",
+    "test:types": "nuxt prepare && vue-tsc -b --noEmit"
   },
   "dependencies": {
     "jose": "^6.2.3",
