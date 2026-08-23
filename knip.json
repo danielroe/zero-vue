@@ -3,6 +3,10 @@
   "ignore": [
     "test/e2e/**"
   ],
+  "ignoreUnresolved": [
+    "#imports",
+    "#zero-options"
+  ],
   "ignoreDependencies": [
     "pg",
     "@types/pg"

@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.test.ts', 'test/index.test.ts'],
+    include: ['src/**/*.test.ts', 'test/*.test.ts'],
     onConsoleLog(log) {
       if (log.includes('Zero starting up with no server URL')) {
         return false

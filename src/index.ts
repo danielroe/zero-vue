@@ -1,3 +1,5 @@
 export { createZeroComposables } from './create-zero-composables'
+export type { ZeroComposables } from './create-zero-composables'
+export { defineZeroOptions } from './define-zero-options'
 export type { MaybeQueryResult, QueryResult, UseQueryOptions } from './query'
 export { useQuery } from './query'

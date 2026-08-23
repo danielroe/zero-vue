@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
+  modules: ['zero-vue'],
   devtools: { enabled: true },
   alias: {
     '#fx': fileURLToPath(new URL('../_shared', import.meta.url)),
@@ -14,24 +15,11 @@ export default defineNuxtConfig({
   css: ['~/assets/index.css'],
   runtimeConfig: {
     authSecret: '',
-    public: {
-      zero: {
-        ssr: false,
-        cacheURL: '',
-        queryURL: '',
-        mutateURL: '',
-      },
-    },
   },
   compatibilityDate: '2025-05-25',
   vite: {
     optimizeDeps: {
-      esbuildOptions: {
-        target: 'es2022',
-      },
       include: [
-        '@rocicorp/zero',
-        '@rocicorp/zero/bindings',
         'jose',
         'zod',
       ],
