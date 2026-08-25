@@ -41,7 +41,7 @@
     "@rocicorp/resolver": "1.0.2",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "4.1.10",
-    "eslint": "10.8.1",
+    "eslint": "10.9.1",
     "installed-check": "11.0.0",
     "knip": "6.32.2",
     "nano-staged": "1.0.2",
