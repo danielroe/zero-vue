@@ -1,6 +1,5 @@
 import type { Change, ErroredQuery, Node, Query } from '@rocicorp/zero'
 
-import { resolver } from '@rocicorp/resolver'
 import {
   createBuilder,
   createSchema,
@@ -1399,7 +1398,7 @@ describe('vueView', () => {
     await zero.mutate(mutators.insert({ a: 1, b: 'a' })).client
     await zero.mutate(mutators.insert({ a: 2, b: 'b' })).client
 
-    const queryCompleteResolver = resolver<true>()
+    const queryCompleteResolver = Promise.withResolvers<true>()
 
     const onTransactionCommit = () => {}
 

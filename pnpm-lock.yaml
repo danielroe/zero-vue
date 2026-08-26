@@ -24,9 +24,6 @@ importers:
       '@nuxt/schema':
         specifier: 4.5.2
         version: 4.5.2
-      '@rocicorp/resolver':
-        specifier: 1.0.2
-        version: 1.0.2
       '@types/pg':
         specifier: 8.23.1
         version: 8.23.1
