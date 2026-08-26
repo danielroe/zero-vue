@@ -1,6 +1,6 @@
 import { useCookies } from '@vueuse/integrations/useCookies'
 import { decodeJwt } from 'jose'
-import { createZeroComposables } from 'zero-vue'
+import { createZeroPlugin } from 'zero-vue'
 
 import { mutators, schema } from '#fx/db/schema'
 
@@ -8,7 +8,7 @@ export { mutators, queries } from '#fx/db/schema'
 
 const cookies = useCookies()
 
-export const { useZero, useQuery } = createZeroComposables(() => {
+export const zero = createZeroPlugin(() => {
   const encodedJWT = cookies.get('jwt')
   const decodedJWT = encodedJWT && decodeJwt(encodedJWT)
   const userID = typeof decodedJWT?.sub === 'string' ? decodedJWT.sub : undefined

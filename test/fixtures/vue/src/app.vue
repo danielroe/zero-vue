@@ -2,11 +2,12 @@
 import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { computed, ref } from 'vue'
+import { useQuery, useZero } from 'zero-vue'
 import { useInterval } from '#fx/composables/use-interval'
 import { randomMessage } from '#fx/db/data/test-data'
 import { formatDate } from '#fx/utils/date'
 import { randInt } from '#fx/utils/rand'
-import { mutators, queries, useQuery, useZero } from './zero'
+import { mutators, queries } from './zero'
 
 const cookies = useCookies()
 
