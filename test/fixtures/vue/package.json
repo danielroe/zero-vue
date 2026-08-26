@@ -15,6 +15,7 @@
     "test:types": "vue-tsc --build"
   },
   "dependencies": {
+    "@rocicorp/zero": "^1.9.0",
     "@vueuse/integrations": "^14.3.0",
     "h3": "^1.15.11",
     "jose": "^6.2.3",

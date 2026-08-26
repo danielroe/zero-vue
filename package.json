@@ -3,9 +3,24 @@
   "type": "module",
   "version": "0.8.1",
   "packageManager": "pnpm@11.23.0",
-  "description": "",
+  "description": "Vue and Nuxt bindings for Zero, the general-purpose sync engine",
+  "author": "Daniel Roe <daniel@roe.dev> (https://roe.dev)",
   "license": "MIT",
+  "funding": "https://github.com/sponsors/danielroe",
+  "homepage": "https://github.com/danielroe/zero-vue#readme",
   "repository": "danielroe/zero-vue",
+  "bugs": "https://github.com/danielroe/zero-vue/issues",
+  "keywords": [
+    "vue",
+    "nuxt",
+    "zero",
+    "rocicorp",
+    "sync",
+    "sync-engine",
+    "local-first",
+    "realtime",
+    "zql"
+  ],
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.mjs",
@@ -24,6 +39,7 @@
     "build": "tsdown",
     "dev": "vitest dev",
     "lint": "eslint .",
+    "lint:package": "pnpm build && publint && attw --pack . --profile esm-only --exclude-entrypoints nuxt/composables",
     "prepare": "simple-git-hooks",
     "prepack": "pnpm build",
     "prepublishOnly": "pnpm lint && pnpm test",
@@ -35,6 +51,7 @@
   "peerDependencies": {
     "@nuxt/kit": "^3.13.0 || ^4.0.0",
     "@nuxt/schema": "^3.13.0 || ^4.0.0",
+    "@rocicorp/zero": "^1.9.0",
     "vue": "^3.5.13"
   },
   "peerDependenciesMeta": {
@@ -45,13 +62,12 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "@rocicorp/zero": "^1.9.0"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "9.3.0",
+    "@arethetypeswrong/cli": "0.18.5",
     "@nuxt/kit": "4.5.2",
     "@nuxt/schema": "4.5.2",
+    "@rocicorp/zero": "1.9.0",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "4.1.11",
     "eslint": "10.9.1",
@@ -60,6 +76,7 @@
     "nano-staged": "1.0.2",
     "pg": "8.23.0",
     "playwright-core": "1.62.1",
+    "publint": "0.3.24",
     "simple-git-hooks": "2.13.1",
     "tsdown": "0.22.14",
     "typescript": "6.0.3",
