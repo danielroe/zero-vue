@@ -66,9 +66,52 @@ const { data: users } = useQuery(() => zero.value.query.user)
 > [!TIP]
 > See [the Vue fixture](./test/fixtures/vue) or [the Nuxt fixture](./test/fixtures/nuxt) for full working examples based on [rocicorp/hello-zero](https://github.com/rocicorp/hello-zero).
 
+## Nuxt
+
+A Nuxt module ships with `zero-vue`. It handles common SSR pain points automatically: composables are scoped per request, the server-side Zero instance is closed after render, and an SSR-aware query composable is provided.
+
+Add the module:
+
+```ts
+export default defineNuxtConfig({
+  modules: ['zero-vue'],
+})
+```
+
+Create a `zero.config.ts` in your `app/` directory with a default export of `defineZeroOptions`. It accepts the same argument as `createZeroComposables`, and a getter can use Nuxt composables like `useCookie` and `useRuntimeConfig`:
+
+```ts
+import { defineZeroOptions } from 'zero-vue'
+import { useCookie, useRuntimeConfig } from '#imports'
+import { mutators, schema } from './db/schema'
+
+export default defineZeroOptions(() => {
+  const config = useRuntimeConfig()
+  return {
+    userID: useCookie('userID').value ?? undefined,
+    cacheURL: config.public.zero.cacheURL || undefined,
+    schema,
+    mutators,
+    kvStore: 'mem',
+  }
+})
+```
+
+The module then auto-imports fully-typed composables (typed from the schema and mutators in your `zero.config.ts`):
+
+- `useZero()` — the request-scoped `Zero` instance
+- `useQuery(query, options?)` — reactive query view
+- `useConnectionState()` — readonly connection state
+- `useZeroSsrQuery(key, query)` — `useAsyncData`-backed query so data is present in the SSR payload, handed over to the live view once the client has synced
+- `useZeroComposables()` — the whole request-scoped bundle, if you need to pass it around
+
+It also seeds `runtimeConfig.public.zero` with `cacheURL`, `queryURL` and `mutateURL`, so you can configure them from module options (the `zero` key in `nuxt.config`) or environment variables (`NUXT_PUBLIC_ZERO_CACHE_URL`, `NUXT_PUBLIC_ZERO_QUERY_URL`, `NUXT_PUBLIC_ZERO_MUTATE_URL`) without any boilerplate.
+
+By default the server never opens a websocket to zero-cache: any `cacheURL`/`server` in your zero options is stripped during SSR, so `useZeroSsrQuery` falls back to an empty SSR payload and the client syncs after hydration. Set `zero: { ssr: true }` in `nuxt.config` to let the per-request server-side Zero instance connect and pre-fetch (it is closed automatically after render).
+
 ## SSR
 
-Zero is designed for the browser: it opens a WebSocket to `zero-cache`, keeps a local replica in IndexedDB or in-memory, and exposes a reactive view. None of that is straightforward with server-rendering, so there are a few pain points to be aware of today when wiring `zero-vue` into an SSR framework like Nuxt. A dedicated `zero-vue/nuxt` module is planned to handle these automatically; until then, [the Nuxt fixture](./test/fixtures/nuxt) might be a useful guide.
+Zero is designed for the browser: it opens a WebSocket to `zero-cache`, keeps a local replica in IndexedDB or in-memory, and exposes a reactive view. None of that is straightforward with server-rendering, so there are a few pain points to be aware of when wiring `zero-vue` into an SSR framework. In Nuxt, [the module above](#nuxt) handles these automatically; the notes below apply if you're wiring things up by hand.
 
 **Scope `createZeroComposables` per request.** The composables returned by `createZeroComposables` close over a single `Zero` instance. If you call it at module scope, every SSR request will share that instance (and its `userID`, its local data, and its WebSocket). Cache the composables on `useNuxtApp()` instead, and close the instance once the response has rendered:
 

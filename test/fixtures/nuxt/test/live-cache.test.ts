@@ -14,9 +14,11 @@ if (LIVE) {
   await setup({
     rootDir: fileURLToPath(new URL('..', import.meta.url)),
     port: APP_PORT,
+    nuxtConfig: {
+      zero: { ssr: true },
+    },
     env: {
       NUXT_AUTH_SECRET: 'test-secret-for-e2e',
-      NUXT_PUBLIC_ZERO_SSR: 'true',
       NUXT_PUBLIC_ZERO_CACHE_URL: process.env.NUXT_PUBLIC_ZERO_CACHE_URL ?? 'http://localhost:4849',
       NUXT_PUBLIC_ZERO_QUERY_URL: `http://localhost:${APP_PORT}/api/zero/query`,
       NUXT_PUBLIC_ZERO_MUTATE_URL: `http://localhost:${APP_PORT}/api/zero/mutate`,
