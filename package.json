@@ -72,7 +72,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "eslint": "10.9.1",
     "installed-check": "11.0.0",
-    "knip": "6.32.2",
+    "knip": "6.32.3",
     "nano-staged": "1.0.2",
     "pg": "8.23.0",
     "playwright-core": "1.62.1",
