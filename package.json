@@ -2,7 +2,7 @@
   "name": "zero-vue",
   "type": "module",
   "version": "0.8.1",
-  "packageManager": "pnpm@11.23.0",
+  "packageManager": "pnpm@11.24.0",
   "description": "Vue and Nuxt bindings for Zero, the general-purpose sync engine",
   "author": "Daniel Roe <daniel@roe.dev> (https://roe.dev)",
   "license": "MIT",
