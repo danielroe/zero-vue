@@ -35,6 +35,9 @@ jobs:
       - name: ⚙️ Check package engines
         run: pnpm installed-check -d --no-workspaces
 
+      - name: 📦 Lint published package
+        run: pnpm lint:package
+
   test:
     runs-on: ubuntu-latest
 

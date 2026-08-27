@@ -16,6 +16,7 @@
     "test:types": "nuxt prepare && vue-tsc -b --noEmit"
   },
   "dependencies": {
+    "@rocicorp/zero": "^1.9.0",
     "jose": "^6.2.3",
     "nuxt": "^4.4.8",
     "postgres": "3.4.7",
