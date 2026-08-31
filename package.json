@@ -77,12 +77,12 @@
     "pg": "8.23.0",
     "playwright-core": "1.62.1",
     "publint": "0.3.24",
-    "simple-git-hooks": "2.13.1",
+    "simple-git-hooks": "2.14.0",
     "tsdown": "0.22.14",
     "typescript": "6.0.3",
     "vitest": "4.1.11",
     "vue": "3.5.42",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "simple-git-hooks": {
     "pre-commit": "npx nano-staged"
