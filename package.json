@@ -19,7 +19,10 @@
   "license": "MIT",
   "funding": "https://github.com/sponsors/danielroe",
   "homepage": "https://github.com/danielroe/zero-vue#readme",
-  "repository": "danielroe/zero-vue",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielroe/zero-vue.git"
+  },
   "bugs": "https://github.com/danielroe/zero-vue/issues",
   "keywords": [
     "vue",
@@ -50,7 +53,6 @@
     "build": "tsdown",
     "dev": "vitest dev",
     "lint": "eslint .",
-    "lint:package": "pnpm build && publint && attw --pack . --profile esm-only --exclude-entrypoints nuxt/composables",
     "prepare": "simple-git-hooks",
     "prepack": "pnpm build",
     "prepublishOnly": "pnpm lint && pnpm test",
@@ -75,7 +77,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "9.3.0",
-    "@arethetypeswrong/cli": "0.18.5",
+    "@arethetypeswrong/core": "0.18.5",
     "@nuxt/kit": "4.5.2",
     "@nuxt/schema": "4.5.2",
     "@rocicorp/zero": "1.9.0",

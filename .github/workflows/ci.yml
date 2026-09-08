@@ -36,7 +36,7 @@ jobs:
         run: pnpm installed-check -d --no-workspaces
 
       - name: 📦 Lint published package
-        run: pnpm lint:package
+        run: pnpm build
 
   test:
     runs-on: ubuntu-latest
