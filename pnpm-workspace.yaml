@@ -11,7 +11,7 @@ packages:
   - test/fixtures/nuxt
 
 overrides:
-  zero-vue: 'link:.'
+  zero-vue: 'workspace:*'
 
 allowBuilds:
   '@parcel/watcher': false

@@ -6,6 +6,12 @@ export default defineConfig([
     target: 'es2022',
     deps: { neverBundle: ['@nuxt/kit', '@nuxt/schema'] },
     dts: { oxc: true },
+    publint: true,
+    attw: {
+      profile: 'esm-only',
+      level: 'error',
+      excludeEntrypoints: ['./nuxt/composables'],
+    },
   },
   {
     entry: { 'nuxt/composables': 'src/runtime/composables.ts' },
