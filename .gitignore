@@ -14,3 +14,4 @@ coverage
 !test/fixtures/_shared/.env
 !test/fixtures/vue/.env
 !test/fixtures/nuxt/.env
+!test/fixtures/nuxt-v5/.env
