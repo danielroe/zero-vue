@@ -1,3 +1,7 @@
+minimumReleaseAgeExclude:
+  - '@nuxt/*'
+  - nuxt-nightly
+
 shellEmulator: true
 
 trustPolicy: no-downgrade
@@ -9,6 +13,7 @@ trustPolicyExclude:
 packages:
   - test/fixtures/vue
   - test/fixtures/nuxt
+  - test/fixtures/nuxt-v5
 
 overrides:
   zero-vue: 'workspace:*'
