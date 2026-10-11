@@ -78,8 +78,8 @@
   "devDependencies": {
     "@antfu/eslint-config": "9.3.0",
     "@arethetypeswrong/core": "0.18.5",
-    "@nuxt/kit": "4.6.0",
-    "@nuxt/schema": "4.6.0",
+    "@nuxt/kit": "4.6.1",
+    "@nuxt/schema": "4.6.1",
     "@rocicorp/zero": "1.9.0",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.0.3",
