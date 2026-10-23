@@ -6,15 +6,16 @@ import {
   defineMutatorWithType,
   defineQueriesWithType,
   defineQuery,
+  defineQueryWithType,
   number,
   relationships,
   string,
   table,
   Zero,
 } from '@rocicorp/zero'
-import { asQueryInternals } from '@rocicorp/zero/bindings'
+import { addContextToQuery, asQueryInternals } from '@rocicorp/zero/bindings'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import { nextTick, ref, watchEffect } from 'vue'
+import { nextTick, ref, shallowRef, watchEffect } from 'vue'
 import z from 'zod'
 import { createZeroComposables } from './create-zero-composables'
 import { useQuery } from './query'
@@ -144,26 +145,11 @@ describe('useQuery', () => {
       vueViewFactory,
       { ttl: '1m' },
     )
-    expect(materializeSpy.mock.calls[0]![0]).toMatchInlineSnapshot(`
-      QueryImpl {
-        "customQueryID": {
-          "args": [],
-          "name": "table",
-        },
-        "format": {
-          "relationships": {},
-          "singular": false,
-        },
-        "limit": [Function],
-        "one": [Function],
-        "orderBy": [Function],
-        "related": [Function],
-        "start": [Function],
-        "where": [Function],
-        "whereExists": [Function],
-        Symbol(): true,
-      }
-    `)
+    expect(materializeSpy.mock.calls[0]![0]).toMatchObject({
+      customQueryID: { args: [], name: 'table' },
+      format: { relationships: {}, singular: false },
+      ast: { table: 'table' },
+    })
 
     const view: VueView = materializeSpy.mock.results[0]!.value
     const updateTTLSpy = vi.spyOn(view, 'updateTTL')
@@ -283,7 +269,9 @@ describe('useQuery', () => {
     const zql = createBuilder(schema)
     const pluralQuery = zql.table.where('a', 1).limit(1)
     const singularQuery = zql.table.where('a', 1).one()
-    expect(asQueryInternals(pluralQuery).hash()).toBe(asQueryInternals(singularQuery).hash())
+    // Zero 1.11 includes format in the hash; earlier versions hash only the AST.
+    expect(asQueryInternals(pluralQuery).ast).toEqual(asQueryInternals(singularQuery).ast)
+    expect(asQueryInternals(pluralQuery).format).not.toEqual(asQueryInternals(singularQuery).format)
 
     const singular = ref(false)
     const materializeSpy = vi.spyOn(zero.value, 'materialize')
@@ -335,7 +323,8 @@ describe('useQuery', () => {
     const singularQuery = zql.issue
       .where('id', 'i1')
       .related('comments', q => q.one())
-    expect(asQueryInternals(pluralQuery).hash()).toBe(asQueryInternals(singularQuery).hash())
+    expect(asQueryInternals(pluralQuery).ast).toEqual(asQueryInternals(singularQuery).ast)
+    expect(asQueryInternals(pluralQuery).format).not.toEqual(asQueryInternals(singularQuery).format)
 
     onTestFinished(async () => {
       await zero.close()
@@ -355,6 +344,51 @@ describe('useQuery', () => {
     await nextTick()
 
     expect(materializeSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('re-evaluates a reused query request when the Zero context changes', async () => {
+    const defineMutator = defineMutatorWithType<typeof schema, { a: number }>()
+    const mutators = defineMutatorsWithType<typeof schema>()({
+      insert: defineMutator(z.object({ a: z.number(), b: z.string() }), async ({ tx, args }) => {
+        await tx.mutate.table.insert(args)
+      }),
+    })
+    const zql = createBuilder(schema)
+    const defineQuery = defineQueryWithType<typeof schema, { a: number }>()
+    const queries = defineQueriesWithType<typeof schema>()({
+      contextual: defineQuery(({ ctx }) => zql.table.where('a', ctx.a)),
+    })
+    // Keep the same request identity across clients, as callers can do with
+    // memoized requests. Its name/args stay the same while its local AST changes.
+    const request = queries.contextual()
+    const first = new Zero({ userID: 'context-1', server: null, schema, mutators, context: { a: 1 }, kvStore: 'mem' })
+    const second = new Zero({ userID: 'context-2', server: null, schema, mutators, context: { a: 2 }, kvStore: 'mem' })
+    onTestFinished(async () => {
+      await Promise.all([first.close(), second.close()])
+    })
+    for (const instance of [first, second]) {
+      await instance.mutate(mutators.insert({ a: 1, b: 'first' })).client
+      await instance.mutate(mutators.insert({ a: 2, b: 'second' })).client
+    }
+    const current = shallowRef(first)
+    const firstMaterialize = vi.spyOn(first, 'materialize')
+    const secondMaterialize = vi.spyOn(second, 'materialize')
+    const { data } = useQuery(current, request)
+    expect(data.value).toMatchObject([{ a: 1, b: 'first' }])
+    const view = firstMaterialize.mock.results[0]!.value as VueView
+    const destroy = vi.spyOn(view, 'destroy')
+
+    current.value = second
+    await nextTick()
+
+    expect(destroy).toHaveBeenCalledExactlyOnceWith()
+    expect(secondMaterialize).toHaveBeenCalledTimes(1)
+    expect(data.value).toMatchObject([{ a: 2, b: 'second' }])
+    const initialQuery = asQueryInternals(addContextToQuery(firstMaterialize.mock.calls[0]![0], first.context))
+    const updatedQuery = asQueryInternals(addContextToQuery(secondMaterialize.mock.calls[0]![0], second.context))
+    expect(initialQuery.customQueryID).toEqual(updatedQuery.customQueryID)
+    expect(initialQuery.ast).not.toEqual(updatedQuery.ast)
+    expect(initialQuery.hash()).not.toBe(updatedQuery.hash())
   })
 
   it('useQuery deps change watchEffect', async () => {
