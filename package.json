@@ -64,7 +64,7 @@
   "peerDependencies": {
     "@nuxt/kit": "^3.13.0 || ^4.0.0 || ^5.0.0-0",
     "@nuxt/schema": "^3.13.0 || ^4.0.0 || ^5.0.0-0",
-    "@rocicorp/zero": "^1.9.0",
+    "@rocicorp/zero": "^1.11.0",
     "vue": "^3.5.13"
   },
   "peerDependenciesMeta": {
@@ -80,7 +80,7 @@
     "@arethetypeswrong/core": "0.18.5",
     "@nuxt/kit": "4.6.2",
     "@nuxt/schema": "4.6.2",
-    "@rocicorp/zero": "1.9.0",
+    "@rocicorp/zero": "1.11.0",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.0.5",
     "eslint": "10.13.0",
@@ -98,11 +98,11 @@
     "zod": "4.5.4"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx nano-staged"
+    "pre-commit": "pnpm exec nano-staged"
   },
   "nano-staged": {
     "*.{js,ts,mjs,cjs,json,.*rc}": [
-      "npx eslint --fix"
+      "eslint --fix"
     ]
   }
 }

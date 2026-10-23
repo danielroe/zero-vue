@@ -17,12 +17,18 @@ import type {
   TTL,
 } from '@rocicorp/zero'
 import type { ViewChange } from '@rocicorp/zero/bindings'
-import type { Ref, ShallowRef } from 'vue'
+import type { ShallowRef } from 'vue'
 import { applyChange, skipYields } from '@rocicorp/zero/bindings'
-import { ref, shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 
 export type QueryStatus = QueryResultDetails['type']
 export type QueryError = QueryErrorDetails['error']
+
+interface ViewSnapshot {
+  root: Entry
+  status: QueryStatus
+  error: QueryError | undefined
+}
 
 export class VueView implements Output {
   readonly #input: Input
@@ -31,9 +37,12 @@ export class VueView implements Output {
   readonly #updateTTL: (ttl: TTL) => void
 
   #root: Entry
-  #data: ShallowRef<Entry>
-  #status: Ref<QueryStatus>
-  #error: Ref<QueryError | undefined>
+  #snapshot: ShallowRef<ViewSnapshot>
+  #status: QueryStatus
+  #error: QueryError | undefined
+  #dirty = false
+  #held = false
+  #released = false
   #isDestroyed = false
   #txnDirty = new WeakSet<object>()
 
@@ -50,9 +59,9 @@ export class VueView implements Output {
     this.#onDestroy = onDestroy
     this.#updateTTL = updateTTL
     this.#root = { '': format.singular ? undefined : [] }
-    this.#data = shallowRef(this.#root)
-    this.#status = ref(queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown')
-    this.#error = ref(queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined) as Ref<QueryError | undefined>
+    this.#status = queryComplete === true ? 'complete' : 'error' in queryComplete ? 'error' : 'unknown'
+    this.#error = queryComplete !== true && 'error' in queryComplete ? makeError(queryComplete) : undefined
+    this.#snapshot = shallowRef({ root: this.#root, status: this.#status, error: this.#error })
 
     input.setOutput(this)
 
@@ -60,31 +69,33 @@ export class VueView implements Output {
       this.#applyChange({ type: 'add', node }, true)
     }
 
-    this.#data.value = this.#root
+    this.#dirty = true
+    this.#flush()
 
     onTransactionCommit(() => this.#flush())
 
     if (queryComplete !== true && !('error' in queryComplete)) {
       void queryComplete.then(() => {
-        this.#status.value = 'complete'
-        this.#error.value = undefined
+        this.#setStatus('complete')
       }).catch((error: ErroredQuery) => {
-        this.#status.value = 'error'
-        this.#error.value = makeError(error)
+        this.#setStatus('error', makeError(error))
       })
     }
   }
 
   get data(): Entry[string] {
-    return this.#data.value['']
+    const snapshot = this.#snapshot.value
+    return (this.#released ? this.#root : snapshot.root)['']
   }
 
   get status(): QueryStatus {
-    return this.#status.value
+    const snapshot = this.#snapshot.value
+    return this.#released ? this.#status : snapshot.status
   }
 
   get error(): QueryError | undefined {
-    return this.#error.value
+    const snapshot = this.#snapshot.value
+    return this.#released ? this.#error : snapshot.error
   }
 
   destroy(): void {
@@ -95,7 +106,7 @@ export class VueView implements Output {
   }
 
   #applyChange(change: ViewChange, mutate: boolean | WeakSet<object> = this.#txnDirty): void {
-    this.#root = applyChange(
+    const root = applyChange(
       this.#root,
       change,
       this.#input.getSchema(),
@@ -104,6 +115,10 @@ export class VueView implements Output {
       false,
       mutate,
     )
+    if (root !== this.#root) {
+      this.#root = root
+      this.#dirty = true
+    }
   }
 
   push(change: Change): readonly never[] {
@@ -115,9 +130,56 @@ export class VueView implements Output {
     this.#updateTTL(ttl)
   }
 
+  markCached(): void {
+    if (this.#status === 'unknown') {
+      this.#setStatus('cached')
+    }
+  }
+
+  unmarkCached(): void {
+    if (this.#status === 'cached') {
+      this.#setStatus('unknown')
+    }
+  }
+
+  holdData(): void {
+    // Rows already wait for commit; hold result details through hydration too.
+    this.#held = true
+    this.#released = false
+  }
+
+  releaseData(): void {
+    // Zero releases every view in a hydration batch before committing any of
+    // them. Make all snapshots readable without notifying observers yet.
+    this.#released = true
+  }
+
+  #setStatus(status: QueryStatus, error?: QueryError): void {
+    this.#status = status
+    this.#error = error
+    if (this.#held || this.#dirty) {
+      this.#dirty = true
+    }
+    else {
+      this.#publish()
+    }
+  }
+
   #flush(): void {
+    this.#held = false
+    this.#released = false
+    if (!this.#dirty) {
+      return
+    }
+    this.#dirty = false
+    this.#publish()
+  }
+
+  #publish(): void {
+    // Reset ownership before sync watchers can push another transaction, and
+    // publish rows and result details together so those watchers see one state.
     this.#txnDirty = new WeakSet<object>()
-    this.#data.value = this.#root
+    this.#snapshot.value = { root: this.#root, status: this.#status, error: this.#error }
   }
 }
 
