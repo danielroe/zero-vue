@@ -269,9 +269,6 @@ describe('useQuery', () => {
     const zql = createBuilder(schema)
     const pluralQuery = zql.table.where('a', 1).limit(1)
     const singularQuery = zql.table.where('a', 1).one()
-    // Zero 1.11 includes format in the hash; earlier versions hash only the AST.
-    expect(asQueryInternals(pluralQuery).ast).toEqual(asQueryInternals(singularQuery).ast)
-    expect(asQueryInternals(pluralQuery).format).not.toEqual(asQueryInternals(singularQuery).format)
 
     const singular = ref(false)
     const materializeSpy = vi.spyOn(zero.value, 'materialize')
@@ -323,8 +320,6 @@ describe('useQuery', () => {
     const singularQuery = zql.issue
       .where('id', 'i1')
       .related('comments', q => q.one())
-    expect(asQueryInternals(pluralQuery).ast).toEqual(asQueryInternals(singularQuery).ast)
-    expect(asQueryInternals(pluralQuery).format).not.toEqual(asQueryInternals(singularQuery).format)
 
     onTestFinished(async () => {
       await zero.close()

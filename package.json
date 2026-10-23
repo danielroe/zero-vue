@@ -64,7 +64,7 @@
   "peerDependencies": {
     "@nuxt/kit": "^3.13.0 || ^4.0.0 || ^5.0.0-0",
     "@nuxt/schema": "^3.13.0 || ^4.0.0 || ^5.0.0-0",
-    "@rocicorp/zero": "^1.9.0",
+    "@rocicorp/zero": "^1.11.0",
     "vue": "^3.5.13"
   },
   "peerDependenciesMeta": {
