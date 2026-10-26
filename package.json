@@ -76,7 +76,7 @@
     }
   },
   "devDependencies": {
-    "@antfu/eslint-config": "9.3.0",
+    "@antfu/eslint-config": "10.0.0",
     "@arethetypeswrong/core": "0.18.5",
     "@nuxt/kit": "4.6.2",
     "@nuxt/schema": "4.6.2",
